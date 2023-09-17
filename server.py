@@ -4,6 +4,7 @@ import json
 from servers import Servers
 
 server = Servers('192.168.0.163', 61033, 1024)
+server.add_server_version("0.1.0")
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((server.host, server.port))
@@ -26,7 +27,12 @@ while True:
         break
 
     if command == 'uptime':
-        output = json.dumps({"server_uptime": str(server.get_uptime())}, indent=4)
+        output = json.dumps({"server_uptime": str(server.get_server_uptime())}, indent=4)
+        msg = output.encode("utf8")
+        client_socket.send(msg)
+
+    if command == 'info':
+        output = json.dumps(server.versions, indent=4)
         msg = output.encode("utf8")
         client_socket.send(msg)
 
