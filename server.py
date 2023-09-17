@@ -17,14 +17,10 @@ while True:
     command = client_socket.recv(server.buffer).decode("utf8")
 
     if command == 'help':
-        output = json.dumps(commands.commands_description, indent=4)
-        print(output)
-        msg = f"Return message for command: {command}".encode("utf8")
+        output = json.dumps(commands.command_help(), indent=4)
+        msg = output.encode("utf8")
         client_socket.send(msg)
 
     if command == 'close':
-        msg = f"Return message for command: {command}".encode("utf8")
-        client_socket.send(msg)
         server_socket.close()
-        print("soc closed")
         break

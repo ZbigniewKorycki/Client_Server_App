@@ -10,7 +10,6 @@ while True:
     command = input('Command: ').encode("utf8")
     if command.decode("utf8") == 'close':
         client_socket.send(command)
-        print(client_socket.recv(client.buffer).decode("utf8"))
         client_socket.close()
         break
     else:
