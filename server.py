@@ -21,6 +21,13 @@ while True:
     if command == 'help':
         output = json.dumps(commands.commands_description, indent=4)
         print(output)
+        msg = f"Return message for command: {command}".encode("utf8")
+        client_socket.send(msg)
 
-    msg = f"Return message for command: {command}".encode("utf8")
-    client_socket.send(msg)
+    if command == 'close':
+        msg = f"Return message for command: {command}".encode("utf8")
+        client_socket.send(msg)
+        server_socket.close()
+        print("soc closed")
+        break
+

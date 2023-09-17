@@ -5,11 +5,16 @@ PORT = 61033
 
 BUFFER = 1024
 
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect((HOST, PORT))
+while True:
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((HOST, PORT))
+    command = input('Command: ').encode("utf8")
+    if command.decode("utf8") == 'close':
+        client_socket.send(command)
+        print(client_socket.recv(BUFFER).decode("utf8"))
+        client_socket.close()
+        break
+    else:
+        client_socket.send(command)
+        print(client_socket.recv(BUFFER).decode("utf8"))
 
-command = input('Command: ').encode("utf8")
-
-client_socket.send(command)
-
-print(client_socket.recv(BUFFER).decode("utf8"))
