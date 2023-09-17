@@ -12,7 +12,7 @@ server_socket.listen(2)
 while True:
     client_socket, address = server_socket.accept()
 
-    print("Connect with the client.")
+    print("Connection with the client.")
 
     command = client_socket.recv(server.buffer).decode("utf8")
 
@@ -38,7 +38,8 @@ while True:
             msg = output.encode("utf8")
             client_socket.send(msg)
     else:
-        message = "Incorrect command - try again or type 'help' for list of available commands."
+        message = ("Incorrect command - try again or type "
+                   "'help' for list of available commands.")
         output = json.dumps(message, indent=4)
         msg = output.encode("utf8")
         client_socket.send(msg)

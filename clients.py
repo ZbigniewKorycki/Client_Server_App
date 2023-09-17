@@ -1,4 +1,4 @@
-class Clients:
+class Client:
     def __init__(self, host, port, buffer):
         self.host = host
         self.port = port
