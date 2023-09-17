@@ -1,9 +1,9 @@
 import socket
 import commands
 import json
-from servers import Servers
+from servers import Server
 
-server = Servers('192.168.0.163', 61033, 1024)
+server = Server('192.168.0.163', 61033, 1024)
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((server.host, server.port))
@@ -16,26 +16,29 @@ while True:
 
     command = client_socket.recv(server.buffer).decode("utf8")
 
-    if command == 'help':
-        output = json.dumps(commands.commands_description, indent=4)
-        msg = output.encode("utf8")
-        client_socket.send(msg)
+    commands_list = ['help', 'info', 'uptime', 'stop']
 
-    if command == 'close':
-        server_socket.close()
-        break
+    if command in commands_list:
+        if command == 'help':
+            output = json.dumps(commands.commands_description, indent=4)
+            msg = output.encode("utf8")
+            client_socket.send(msg)
 
-    if command == 'uptime':
-        output = json.dumps({"server_uptime": str(server.get_server_uptime())}, indent=4)
-        msg = output.encode("utf8")
-        client_socket.send(msg)
+        elif command == 'stop':
+            server_socket.close()
+            break
 
-    if command == 'info':
-        output = json.dumps(server.versions, indent=4)
-        msg = output.encode("utf8")
-        client_socket.send(msg)
+        elif command == 'uptime':
+            output = json.dumps({"server_uptime": str(server.get_server_uptime())}, indent=4)
+            msg = output.encode("utf8")
+            client_socket.send(msg)
 
+        elif command == 'info':
+            output = json.dumps(server.versions, indent=4)
+            msg = output.encode("utf8")
+            client_socket.send(msg)
     else:
-        output = "Incorrect command - try again or type command 'help' for list of available commands."
+        message = "Incorrect command - try again or type 'help' for list of available commands."
+        output = json.dumps(message, indent=4)
         msg = output.encode("utf8")
         client_socket.send(msg)

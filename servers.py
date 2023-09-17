@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-class Servers:
+class Server:
     def __init__(self, host, port, buffer, start_version="0.1.0"):
         self.host = host
         self.port = port
@@ -16,7 +16,9 @@ class Servers:
         return server_uptime
 
     def add_server_version(self, version_num):
-        new_version = {"version": version_num,
-                       "version_date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
-        self.versions.append(new_version)
-        return self.versions
+        if version_num not in self.versions:
+            new_version = {"version": version_num,
+                           "version_date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
+            self.versions.append(new_version)
+            return self.versions
+

@@ -8,7 +8,7 @@ while True:
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((client.host, client.port))
     command = input('Command: ').encode("utf8")
-    if command.decode("utf8") == 'close':
+    if command.decode("utf8") == 'stop':
         client_socket.send(command)
         client_socket.close()
         break
