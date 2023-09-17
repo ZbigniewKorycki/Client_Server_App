@@ -1,14 +1,12 @@
 import socket
 import commands
 import json
+from servers import Servers
 
-HOST = '192.168.0.163'
-PORT = 61033
-
-BUFFER = 1024
+server = Servers('192.168.0.163', 61033, 1024)
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((HOST, PORT))
+server_socket.bind((server.host, server.port))
 server_socket.listen(2)
 
 while True:
@@ -16,7 +14,7 @@ while True:
 
     print("Connect with the client.")
 
-    command = client_socket.recv(BUFFER).decode("utf8")
+    command = client_socket.recv(server.buffer).decode("utf8")
 
     if command == 'help':
         output = json.dumps(commands.commands_description, indent=4)
@@ -30,4 +28,3 @@ while True:
         server_socket.close()
         print("soc closed")
         break
-
