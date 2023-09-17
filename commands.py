@@ -5,6 +5,3 @@ commands_description = {
     "stop": "stops the server and the client simultaneously"
 }
 
-
-def command_help():
-    return commands_description

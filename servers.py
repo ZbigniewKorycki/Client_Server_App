@@ -2,12 +2,13 @@ from datetime import datetime
 
 
 class Servers:
-    def __init__(self, host, port, buffer):
+    def __init__(self, host, port, buffer, start_version="0.1.0"):
         self.host = host
         self.port = port
         self.buffer = buffer
         self.creation_time = datetime.now()
         self.versions = []
+        self.add_server_version(start_version)
 
     def get_server_uptime(self):
         current_time = datetime.now()
