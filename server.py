@@ -24,3 +24,10 @@ while True:
     if command == 'close':
         server_socket.close()
         break
+
+    if command == 'uptime':
+        output = json.dumps({"server_uptime": str(server.get_uptime())}, indent=4)
+        msg = output.encode("utf8")
+        client_socket.send(msg)
+
+
