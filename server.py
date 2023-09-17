@@ -1,4 +1,5 @@
 import socket
+import commands
 
 HOST = '192.168.0.163'
 PORT = 61033
@@ -16,7 +17,8 @@ while True:
 
     command = client_socket.recv(BUFFER).decode("utf8")
 
-    print(f"Command : {command}")
+    if command == 'help':
+        commands.command_help()
 
     msg = f"Return message for command: {command}".encode("utf8")
     client_socket.send(msg)
