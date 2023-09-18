@@ -1,18 +1,17 @@
 import socket
 import commands
 import json
-from servers import Server
+from server_config import Server
 
 server = Server('192.168.0.163', 61033, 1024)
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((server.host, server.port))
 server_socket.listen(2)
+client_socket, address = server_socket.accept()
+print("Connection with the client.")
 
 while True:
-    client_socket, address = server_socket.accept()
-
-    print("Connection with the client.")
 
     command = client_socket.recv(server.buffer).decode("utf8")
 
