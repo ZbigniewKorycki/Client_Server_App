@@ -12,6 +12,14 @@ while True:
         client_socket.send(command)
         client_socket.close()
         break
+    elif command.decode("utf8") == 'add-user':
+        client_socket.send(command)
+        username = input('Input username: ').encode("utf8")
+        client_socket.send(username)
+        password = input('Input password: ').encode("utf8")
+        client_socket.send(password)
+        print(client_socket.recv(client.buffer).decode("utf8"))
+
     else:
         client_socket.send(command)
         print(client_socket.recv(client.buffer).decode("utf8"))
