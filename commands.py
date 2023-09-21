@@ -4,4 +4,5 @@ commands_description = {
     "help": "returns the list of available commands with a short description",
     "stop": "stops the server and the client simultaneously",
     "add-user": "add user to system",
+    "login": "opens the form to log in into system"
 }

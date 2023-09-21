@@ -15,7 +15,7 @@ while True:
 
     command = client_socket.recv(server.buffer).decode("utf8")
 
-    commands_list = ['help', 'info', 'uptime', 'stop', 'add-user']
+    commands_list = ['help', 'info', 'uptime', 'stop', 'add-user', 'login']
 
     if command in commands_list:
         if command == 'help':
@@ -43,6 +43,17 @@ while True:
             output = "add to database"
             msg = output.encode("utf8")
             client_socket.send(msg)
+
+        elif command == 'login':
+            username = client_socket.recv(server.buffer).decode("utf8")
+            password = client_socket.recv(server.buffer).decode("utf8")
+            if server.login_into_system(username, password):
+                output = "Correct login and password"
+            else:
+                output = "Incorrect login or/and password"
+            msg = output.encode("utf8")
+            client_socket.send(msg)
+
 
     else:
         message = ("Incorrect command - try again or type "

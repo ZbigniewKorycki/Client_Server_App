@@ -27,10 +27,10 @@ class Server:
             self.versions.append(new_version)
             return self.versions
 
-    def add_user(self, username, privileges="user"):
+    def add_user(self, username):
         user_data = {"username": username,
-                     "password": self.password_generator(),
-                     "privileges": privileges}
+                     "password": self.password_generator()
+                     }
         user = User(username)
         self.users_info.append(user_data)
         print(self.users_info)
@@ -42,3 +42,13 @@ class Server:
         password = ''.join(random.choice(characters) for i in range(12))
         print(password)
         return password
+
+    def login_into_system(self, username, password):
+        try:
+            login_data = self.users_info.index({"username": username,
+                                                "password": password
+                                                })
+        except ValueError:
+            return False
+        else:
+            return True
