@@ -39,8 +39,7 @@ while True:
 
         elif command == 'add-user':
             username = client_socket.recv(server.buffer).decode("utf8")
-            password = client_socket.recv(server.buffer).decode("utf8")
-            user = server.add_user(username, password)
+            user = server.add_user(username)
             output = "add to database"
             msg = output.encode("utf8")
             client_socket.send(msg)
