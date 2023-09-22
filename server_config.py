@@ -12,8 +12,9 @@ class Server:
         self.creation_time = datetime.now()
         self.versions = []
         self.add_server_version(start_version)
-        self.users_info = []
+        self.users_with_passwords = []
         self.users = []
+        self.users_with_privileges = []
 
     def get_server_uptime(self):
         current_time = datetime.now()
@@ -28,26 +29,31 @@ class Server:
             return self.versions
 
     def add_user(self, username):
-        user_data = {"username": username,
-                     "password": self.password_generator()
-                     }
+        user_with_password = {"username": username,
+                              "password": self.password_generator()
+                              }
+        user_with_privilege = {"username": username,
+                               "privilege": "user"
+                               }
         user = User(username)
-        self.users_info.append(user_data)
-        print(self.users_info)
+        self.users_with_passwords.append(user_with_password)
+        print(self.users_with_passwords)
         self.users.append(user)
         print(self.users)
+        self.users_with_privileges.append(user_with_privilege)
+        print(self.users_with_privileges)
+
 
     def password_generator(self):
         characters = string.ascii_letters + string.digits + string.punctuation
         password = ''.join(random.choice(characters) for i in range(12))
-        print(password)
         return password
 
     def login_into_system(self, username, password):
         try:
-            self.users_info.index({"username": username,
-                                   "password": password
-                                   })
+            self.users_with_passwords.index({"username": username,
+                                             "password": password
+                                             })
         except ValueError:
             return False
         else:
