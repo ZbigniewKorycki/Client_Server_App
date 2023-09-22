@@ -64,6 +64,8 @@ class Server:
         for user in self.users:
             if user.username == username:
                 return user
+        return False
+
 
     def user_base_interface(self, user):
         print(f"You are login as a: {user.username}.")
@@ -72,15 +74,21 @@ class Server:
               "Type 'inbox' to open your inbox.")
 
     def send_message(self, sender, recipient, message):
-        to_user = self.get_user(recipient)
-        if to_user.messages_in_inbox < User.INBOX_MESSAGES_LIMIT_FOR_USER:
-            message_info = {"sender": sender.username, "recipient": recipient, "message": message,
-                            "date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
-            to_user.inbox.append(message_info)
-            to_user.messages_in_inbox += 1
-            return True
-        else:
+        if not self.get_user(recipient):
+            print("User don't exist.")
             return False
+        else:
+            to_user = self.get_user(recipient)
+            if to_user.messages_in_inbox < User.INBOX_MESSAGES_LIMIT_FOR_USER:
+                message_info = {"sender": sender.username, "recipient": recipient, "message": message,
+                                "date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
+                to_user.inbox.append(message_info)
+                to_user.messages_in_inbox += 1
+                return True
+            else:
+                print("messages limit")
+                return False
+
 
 
     def show_inbox(self, user):

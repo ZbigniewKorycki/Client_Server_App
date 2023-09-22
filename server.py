@@ -59,6 +59,9 @@ while True:
                     if command in commands_user_list:
                         if command == 'logout':
                             print("User logout")
+                            output = "open to listen to new commands"
+                            msg = output.encode("utf8")
+                            client_socket.send(msg)
                             break
 
                         elif command == 'send':
@@ -67,7 +70,7 @@ while True:
                             if server.send_message(current_user, recipient, message):
                                 output = "message sent"
                             else:
-                                output = "messages limit"
+                                output = "can't send message"
                             msg = output.encode("utf8")
                             client_socket.send(msg)
 
@@ -87,9 +90,6 @@ while True:
                 output = "Incorrect login or/and password"
                 msg = output.encode("utf8")
                 client_socket.send(msg)
-            output = "open to listen to new commands"
-            msg = output.encode("utf8")
-            client_socket.send(msg)
 
 
     else:
