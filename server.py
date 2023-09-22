@@ -48,18 +48,24 @@ while True:
             username = client_socket.recv(server.buffer).decode("utf8")
             password = client_socket.recv(server.buffer).decode("utf8")
             if server.login_into_system(username, password):
-                output = json.dumps(f"Welcome {username}", indent=4)
+                current_user = server.get_user(username)
+                logged_user, inbox_info, commands_info = server.user_base_interface(current_user)
+                info_after_login = {
+                    "logged_user": logged_user,
+                    "inbox_info": inbox_info,
+                    "commands_info": commands_info
+                }
+
+                output = json.dumps(info_after_login, indent=4)
                 msg = output.encode("utf8")
                 client_socket.send(msg)
-                current_user = server.get_user(username)
-                server.user_base_interface(current_user)
                 while True:
                     command = client_socket.recv(server.buffer).decode("utf8")
                     commands_list_user = ['logout', 'send', 'inbox']
+
                     if command in commands_list_user:
                         if command == 'logout':
-                            print("User logout")
-                            output = "open to listen to new commands"
+                            output = json.dumps(f"User {username} logged out.", indent=4)
                             msg = output.encode("utf8")
                             client_socket.send(msg)
                             break
@@ -77,13 +83,13 @@ while True:
                             client_socket.send(msg)
 
                     else:
-                        message = "Incorrect command, available commands: 'logout', 'send', 'inbox'"
+                        message = f"Incorrect command, available commands: {commands_list_user}"
                         output = json.dumps(message, indent=4)
                         msg = output.encode("utf8")
                         client_socket.send(msg)
 
             else:
-                output = "Incorrect login or/and password"
+                output = json.dumps("Incorrect login or/and password", indent=4)
                 msg = output.encode("utf8")
                 client_socket.send(msg)
 

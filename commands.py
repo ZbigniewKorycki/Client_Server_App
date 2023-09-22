@@ -8,3 +8,5 @@ commands_description = {
     "send": "send message to other user",
     "inbox": "open inbox with all received messages",
 }
+
+

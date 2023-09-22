@@ -66,9 +66,10 @@ class Server:
         return False
 
     def user_base_interface(self, user):
-        print(f"In your inbox you have: {user.messages_in_inbox}/5 messages.")
-        print("Type 'send' to send message to other user.\n"
-              "Type 'inbox' to open your inbox.")
+        logged_user = user.username
+        inbox_info = f"In your inbox you have: {user.messages_in_inbox}/5 messages."
+        commands_info = "'send': Send message to other user, 'inbox': Open your inbox, 'logout': Log out from account"
+        return logged_user, inbox_info, commands_info
 
     def send_message(self, sender, recipient, message):
         if not self.get_user(recipient):
@@ -86,7 +87,6 @@ class Server:
                     return "The recipient has reached the message limit in the inbox."
             else:
                 return "Message is too long (max. 255 characters)."
-
 
 
     def show_inbox(self, user):
