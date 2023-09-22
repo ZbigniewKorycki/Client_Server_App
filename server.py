@@ -67,15 +67,12 @@ while True:
                         elif command == 'send':
                             recipient = client_socket.recv(server.buffer).decode("utf8")
                             message = client_socket.recv(server.buffer).decode("utf8")
-                            if server.send_message(current_user, recipient, message):
-                                output = "message sent"
-                            else:
-                                output = "can't send message"
+                            output = json.dumps(server.send_message(current_user, recipient, message), indent=4)
                             msg = output.encode("utf8")
                             client_socket.send(msg)
 
                         elif command == "inbox":
-                            output = json.dumps(str(server.show_inbox(current_user)), indent=4)
+                            output = json.dumps(server.show_inbox(current_user), indent=4)
                             msg = output.encode("utf8")
                             client_socket.send(msg)
 

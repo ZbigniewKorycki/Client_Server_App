@@ -72,19 +72,21 @@ class Server:
 
     def send_message(self, sender, recipient, message):
         if not self.get_user(recipient):
-            print("User don't exist.")
-            return False
+            return "The recipient does not exist."
         else:
             to_user = self.get_user(recipient)
-            if to_user.messages_in_inbox < User.INBOX_MESSAGES_LIMIT_FOR_USER:
-                message_info = {"sender": sender.username, "recipient": recipient, "message": message,
-                                "date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
-                to_user.inbox.append(message_info)
-                to_user.messages_in_inbox += 1
-                return True
+            if len(message) <= 255:
+                if to_user.messages_in_inbox < User.INBOX_MESSAGES_LIMIT_FOR_USER:
+                    message_info = {"sender": sender.username, "recipient": recipient, "message": message,
+                                    "date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
+                    to_user.inbox.append(message_info)
+                    to_user.messages_in_inbox += 1
+                    return "The message has been successfully sent."
+                else:
+                    return "The recipient has reached the message limit in the inbox."
             else:
-                print("messages limit")
-                return False
+                return "Message is too long (max. 255 characters)."
+
 
 
     def show_inbox(self, user):
