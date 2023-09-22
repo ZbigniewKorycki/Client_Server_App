@@ -26,6 +26,14 @@ while True:
         client_socket.send(password)
         print(client_socket.recv(client.buffer).decode("utf8"))
 
+    elif command.decode("utf8") == 'send':
+        client_socket.send(command)
+        recipient = input('Message recipient: ').encode("utf8")
+        client_socket.send(recipient)
+        message = input('Message: ').encode("utf8")
+        client_socket.send(message)
+        print(client_socket.recv(client.buffer).decode("utf8"))
+
     else:
         client_socket.send(command)
         print(client_socket.recv(client.buffer).decode("utf8"))

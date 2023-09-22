@@ -60,6 +60,15 @@ while True:
                         if command == 'logout':
                             print("User logout")
                             break
+
+                        if command == 'send':
+                            recipient = client_socket.recv(server.buffer).decode("utf8")
+                            message = client_socket.recv(server.buffer).decode("utf8")
+                            server.send_message(current_user, recipient, message)
+                            output = "message sent"
+                            msg = output.encode("utf8")
+                            client_socket.send(msg)
+
             else:
                 output = "Incorrect login or/and password"
                 msg = output.encode("utf8")

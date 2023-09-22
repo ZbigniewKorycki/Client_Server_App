@@ -43,7 +43,6 @@ class Server:
         self.users_with_privileges.append(user_with_privilege)
         print(self.users_with_privileges)
 
-
     def password_generator(self):
         characters = string.ascii_letters + string.digits + string.punctuation
         password = ''.join(random.choice(characters) for i in range(12))
@@ -70,6 +69,9 @@ class Server:
         print("Type 'send' to send message to other user.\n"
               "Type 'inbox' to open your inbox.")
 
-
-
-
+    def send_message(self, sender, recipient, message):
+        to_user = self.get_user(recipient)
+        message_info = {"sender": sender.username, "recipient": recipient, "message": message,
+                        "date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
+        to_user.inbox.append(message_info)
+        print(to_user.inbox)
