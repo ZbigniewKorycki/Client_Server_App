@@ -69,6 +69,12 @@ while True:
                             msg = output.encode("utf8")
                             client_socket.send(msg)
 
+                        if command == "inbox":
+                            server.show_inbox(current_user)
+                            output = "messages shown"
+                            msg = output.encode("utf8")
+                            client_socket.send(msg)
+
             else:
                 output = "Incorrect login or/and password"
                 msg = output.encode("utf8")

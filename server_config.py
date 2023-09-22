@@ -74,4 +74,8 @@ class Server:
         message_info = {"sender": sender.username, "recipient": recipient, "message": message,
                         "date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
         to_user.inbox.append(message_info)
-        print(to_user.inbox)
+
+
+    def show_inbox(self, user):
+        print(user.inbox)
+
