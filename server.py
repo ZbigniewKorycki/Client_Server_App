@@ -49,9 +49,22 @@ while True:
             password = client_socket.recv(server.buffer).decode("utf8")
             if server.login_into_system(username, password):
                 output = "Correct login and password"
-                server.get_user(username)
+                current_user = server.get_user(username)
+                server.user_base_interface(current_user)
+                msg = output.encode("utf8")
+                client_socket.send(msg)
+                while True:
+                    command = client_socket.recv(server.buffer).decode("utf8")
+                    commands_user_list = ['logout', 'send', 'inbox']
+                    if command in commands_user_list:
+                        if command == 'logout':
+                            print("User logout")
+                            break
             else:
                 output = "Incorrect login or/and password"
+                msg = output.encode("utf8")
+                client_socket.send(msg)
+            output = "open to listen to new commands"
             msg = output.encode("utf8")
             client_socket.send(msg)
 

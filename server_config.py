@@ -62,4 +62,14 @@ class Server:
     def get_user(self, username):
         for user in self.users:
             if user.username == username:
-                return user.username
+                return user
+
+    def user_base_interface(self, user):
+        print(f"You are login as a: {user.username}.")
+        print(f"In your inbox you have: {user.messages_in_inbox}/5 messages.")
+        print("Type 'send' to send message to other user.\n"
+              "Type 'inbox' to open your inbox.")
+
+
+
+
