@@ -43,10 +43,12 @@ class Server:
         self.users_with_privileges.append(user_with_privilege)
         print(self.users_with_privileges)
 
+
     def password_generator(self):
         characters = string.ascii_letters + string.digits + string.punctuation
         password = ''.join(random.choice(characters) for i in range(12))
         return password
+
 
     def login_into_system(self, username, password):
         try:
@@ -71,9 +73,14 @@ class Server:
 
     def send_message(self, sender, recipient, message):
         to_user = self.get_user(recipient)
-        message_info = {"sender": sender.username, "recipient": recipient, "message": message,
-                        "date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
-        to_user.inbox.append(message_info)
+        if to_user.messages_in_inbox < User.INBOX_MESSAGES_LIMIT_FOR_USER:
+            message_info = {"sender": sender.username, "recipient": recipient, "message": message,
+                            "date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
+            to_user.inbox.append(message_info)
+            to_user.messages_in_inbox += 1
+            return True
+        else:
+            return False
 
 
     def show_inbox(self, user):

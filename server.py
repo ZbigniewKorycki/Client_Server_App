@@ -61,19 +61,27 @@ while True:
                             print("User logout")
                             break
 
-                        if command == 'send':
+                        elif command == 'send':
                             recipient = client_socket.recv(server.buffer).decode("utf8")
                             message = client_socket.recv(server.buffer).decode("utf8")
-                            server.send_message(current_user, recipient, message)
-                            output = "message sent"
+                            if server.send_message(current_user, recipient, message):
+                                output = "message sent"
+                            else:
+                                output = "messages limit"
                             msg = output.encode("utf8")
                             client_socket.send(msg)
 
-                        if command == "inbox":
+                        elif command == "inbox":
                             server.show_inbox(current_user)
                             output = "messages shown"
                             msg = output.encode("utf8")
                             client_socket.send(msg)
+
+                    else:
+                        message = "Incorrect command - available commands: 'logout', 'send', 'inbox'"
+                        output = json.dumps(message, indent=4)
+                        msg = output.encode("utf8")
+                        client_socket.send(msg)
 
             else:
                 output = "Incorrect login or/and password"
