@@ -29,6 +29,7 @@ class Server:
             return self.versions
 
     def add_user(self, username):
+
         user_with_password = {"username": username,
                               "password": self.password_generator()
                               }
@@ -43,12 +44,10 @@ class Server:
         self.users_with_privileges.append(user_with_privilege)
         print(self.users_with_privileges)
 
-
     def password_generator(self):
         characters = string.ascii_letters + string.digits + string.punctuation
         password = ''.join(random.choice(characters) for i in range(12))
         return password
-
 
     def login_into_system(self, username, password):
         try:
@@ -66,9 +65,7 @@ class Server:
                 return user
         return False
 
-
     def user_base_interface(self, user):
-        print(f"You are login as a: {user.username}.")
         print(f"In your inbox you have: {user.messages_in_inbox}/5 messages.")
         print("Type 'send' to send message to other user.\n"
               "Type 'inbox' to open your inbox.")
@@ -90,7 +87,5 @@ class Server:
                 return False
 
 
-
     def show_inbox(self, user):
-        print(user.inbox)
-
+        return user.inbox

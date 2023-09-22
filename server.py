@@ -48,15 +48,15 @@ while True:
             username = client_socket.recv(server.buffer).decode("utf8")
             password = client_socket.recv(server.buffer).decode("utf8")
             if server.login_into_system(username, password):
-                output = "Correct login and password"
-                current_user = server.get_user(username)
-                server.user_base_interface(current_user)
+                output = json.dumps(f"Welcome {username}", indent=4)
                 msg = output.encode("utf8")
                 client_socket.send(msg)
+                current_user = server.get_user(username)
+                server.user_base_interface(current_user)
                 while True:
                     command = client_socket.recv(server.buffer).decode("utf8")
-                    commands_user_list = ['logout', 'send', 'inbox']
-                    if command in commands_user_list:
+                    commands_list_user = ['logout', 'send', 'inbox']
+                    if command in commands_list_user:
                         if command == 'logout':
                             print("User logout")
                             output = "open to listen to new commands"
@@ -75,13 +75,12 @@ while True:
                             client_socket.send(msg)
 
                         elif command == "inbox":
-                            server.show_inbox(current_user)
-                            output = "messages shown"
+                            output = json.dumps(str(server.show_inbox(current_user)), indent=4)
                             msg = output.encode("utf8")
                             client_socket.send(msg)
 
                     else:
-                        message = "Incorrect command - available commands: 'logout', 'send', 'inbox'"
+                        message = "Incorrect command, available commands: 'logout', 'send', 'inbox'"
                         output = json.dumps(message, indent=4)
                         msg = output.encode("utf8")
                         client_socket.send(msg)
