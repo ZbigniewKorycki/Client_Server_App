@@ -49,6 +49,7 @@ while True:
             password = client_socket.recv(server.buffer).decode("utf8")
             if server.login_into_system(username, password):
                 output = "Correct login and password"
+                server.get_user(username)
             else:
                 output = "Incorrect login or/and password"
             msg = output.encode("utf8")

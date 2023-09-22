@@ -45,10 +45,15 @@ class Server:
 
     def login_into_system(self, username, password):
         try:
-            login_data = self.users_info.index({"username": username,
-                                                "password": password
-                                                })
+            self.users_info.index({"username": username,
+                                   "password": password
+                                   })
         except ValueError:
             return False
         else:
             return True
+
+    def get_user(self, username):
+        for user in self.users:
+            if user.username == username:
+                return user.username
