@@ -39,8 +39,7 @@ while True:
 
         elif command == 'add-user':
             username = client_socket.recv(server.buffer).decode("utf8")
-            user = server.add_user(username)
-            output = "add to database"
+            output = json.dumps(server.add_user(username), indent=4)
             msg = output.encode("utf8")
             client_socket.send(msg)
 
@@ -48,7 +47,7 @@ while True:
             username = client_socket.recv(server.buffer).decode("utf8")
             password = client_socket.recv(server.buffer).decode("utf8")
             if server.login_into_system(username, password):
-                current_user = server.get_user(username)
+                current_user = server.get_user_if_exists(username)
                 logged_user, inbox_info, commands_info = server.user_base_interface(current_user)
                 info_after_login = {
                     "logged_user": logged_user,

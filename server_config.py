@@ -28,15 +28,17 @@ class Server:
             return self.versions
 
     def add_user(self, username):
-
-        user_with_password = {"username": username,
-                              "password": self.password_generator()
-                              }
-        user = User(username)
-        self.users_with_passwords.append(user_with_password)
-        print(self.users_with_passwords)
-        self.users.append(user)
-        print(self.users)
+        if self.get_user_if_exists(username):
+            return "The username exists, choose another nickname."
+        else:
+            user_with_password = {"username": username,
+                                  "password": self.password_generator()
+                                  }
+            user = User(username)
+            self.users_with_passwords.append(user_with_password)
+            self.users.append(user)
+            print(self.users_with_passwords)
+            return "The user has been successfully added."
 
     def password_generator(self):
         characters = string.ascii_letters + string.digits + string.punctuation
@@ -53,7 +55,7 @@ class Server:
         else:
             return True
 
-    def get_user(self, username):
+    def get_user_if_exists(self, username):
         for user in self.users:
             if user.username == username:
                 return user
@@ -66,10 +68,10 @@ class Server:
         return logged_user, inbox_info, commands_info
 
     def send_message(self, sender, recipient, message):
-        if not self.get_user(recipient):
+        if not self.get_user_if_exists(recipient):
             return "The recipient does not exist."
         else:
-            to_user = self.get_user(recipient)
+            to_user = self.get_user_if_exists(recipient)
             if len(message) <= 255:
                 if to_user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER:
                     message_info = {"sender": sender.username, "recipient": recipient, "message": message,
