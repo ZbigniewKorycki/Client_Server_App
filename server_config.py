@@ -80,7 +80,7 @@ class Server:
                 if to_user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER:
                     message_info = {"sender": sender.username, "recipient": recipient, "message": message,
                                     "date": datetime.now().strftime("%m/%d/%Y, %H:%M"), "status": "unread"}
-                    to_user.inbox.append(message_info)
+                    to_user.inbox.insert(0, message_info)
                     to_user.unread_messages_in_inbox += 1
                     return "The message has been successfully sent."
                 else:
