@@ -67,7 +67,7 @@ class Server:
 
     def user_base_interface(self, user):
         logged_user = user.username
-        inbox_info = f"In your inbox you have: {user.messages_in_inbox}/5 messages."
+        inbox_info = f"In your inbox you have: {user.unread_messages_in_inbox} unread messages."
         commands_info = "'send': Send message to other user, 'inbox': Open your inbox, 'logout': Log out from account"
         return logged_user, inbox_info, commands_info
 
@@ -77,11 +77,11 @@ class Server:
         else:
             to_user = self.get_user(recipient)
             if len(message) <= 255:
-                if to_user.messages_in_inbox < User.INBOX_MESSAGES_LIMIT_FOR_USER:
+                if to_user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER:
                     message_info = {"sender": sender.username, "recipient": recipient, "message": message,
-                                    "date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
+                                    "date": datetime.now().strftime("%m/%d/%Y, %H:%M"), "status": "unread"}
                     to_user.inbox.append(message_info)
-                    to_user.messages_in_inbox += 1
+                    to_user.unread_messages_in_inbox += 1
                     return "The message has been successfully sent."
                 else:
                     return "The recipient has reached the message limit in the inbox."
@@ -90,4 +90,8 @@ class Server:
 
 
     def show_inbox(self, user):
+        for message in user.inbox:
+            if message["status"] == "unread":
+                message["status"] = "read"
+        user.unread_messages_in_inbox = 0
         return user.inbox
