@@ -14,7 +14,6 @@ class Server:
         self.add_server_version(start_version)
         self.users_with_passwords = []
         self.users = []
-        self.users_with_privileges = []
 
     def get_server_uptime(self):
         current_time = datetime.now()
@@ -33,16 +32,11 @@ class Server:
         user_with_password = {"username": username,
                               "password": self.password_generator()
                               }
-        user_with_privilege = {"username": username,
-                               "privilege": "user"
-                               }
         user = User(username)
         self.users_with_passwords.append(user_with_password)
         print(self.users_with_passwords)
         self.users.append(user)
         print(self.users)
-        self.users_with_privileges.append(user_with_privilege)
-        print(self.users_with_privileges)
 
     def password_generator(self):
         characters = string.ascii_letters + string.digits + string.punctuation
