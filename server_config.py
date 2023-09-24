@@ -86,6 +86,28 @@ class Server:
             else:
                 return "Message is too long (max. 255 characters)."
 
+    def send_message_to_all(self, sender, message):
+        messages_stats = []
+        if len(message) <= 255:
+            for user in self.users:
+                if user != sender:
+                    if (user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
+                            user.privilege == "admin"):
+                        message_info = {"sender": sender.username, "recipient": user.username, "message": message,
+                                        "date": datetime.now().strftime("%m/%d/%Y, %H:%M"), "status": "unread"}
+                        user.inbox.insert(0, message_info)
+                        user.unread_messages_in_inbox += 1
+                        result = {"recipient": user.username, "result": "Message successfully sent."}
+                    else:
+                        result = {"recipient": user.username, "result": "Not sent. Inbox limit reached."}
+                    messages_stats.append(result)
+                else:
+                    continue
+        else:
+            return "Message is too long (max. 255 characters)."
+        return messages_stats
+
+
     def show_inbox(self, user):
         for message in user.inbox:
             if message["status"] == "unread":

@@ -40,6 +40,12 @@ while True:
         client_socket.send(message)
         print(client_socket.recv(client.buffer).decode("utf8"))
 
+    elif command.decode("utf8") == 'send-to-all':
+        client_socket.send(command)
+        message = input('Message to all users: ').encode("utf8")
+        client_socket.send(message)
+        print(client_socket.recv(client.buffer).decode("utf8"))
+
     else:
         client_socket.send(command)
         print(client_socket.recv(client.buffer).decode("utf8"))

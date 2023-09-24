@@ -15,7 +15,7 @@ while True:
 
     command = client_socket.recv(server.buffer).decode("utf8")
 
-    commands_list = ['help', 'info', 'uptime', 'stop', 'add-user', 'login', 'add-admin']
+    commands_list = ['help', 'info', 'uptime', 'stop', 'add-user', 'login', 'add-admin', 'send-to-all']
 
     if command in commands_list:
         if command == 'help':
@@ -49,6 +49,7 @@ while True:
             msg = output.encode("utf8")
             client_socket.send(msg)
 
+
         elif command == 'login':
             username = client_socket.recv(server.buffer).decode("utf8")
             password = client_socket.recv(server.buffer).decode("utf8")
@@ -66,7 +67,7 @@ while True:
                 client_socket.send(msg)
                 while True:
                     command = client_socket.recv(server.buffer).decode("utf8")
-                    commands_list_user = ['logout', 'send', 'inbox']
+                    commands_list_user = ['logout', 'send', 'inbox', 'send-to-all']
 
                     if command in commands_list_user:
                         if command == 'logout':
@@ -79,6 +80,12 @@ while True:
                             recipient = client_socket.recv(server.buffer).decode("utf8")
                             message = client_socket.recv(server.buffer).decode("utf8")
                             output = json.dumps(server.send_message(current_user, recipient, message), indent=4)
+                            msg = output.encode("utf8")
+                            client_socket.send(msg)
+
+                        elif command == 'send-to-all':
+                            message = client_socket.recv(server.buffer).decode("utf8")
+                            output = json.dumps(server.send_message_to_all(current_user, message), indent=4)
                             msg = output.encode("utf8")
                             client_socket.send(msg)
 

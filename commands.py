@@ -8,6 +8,7 @@ commands_description = {
     "send": "send message to other user",
     "inbox": "open inbox with all received messages",
     "add-admin": "add admin to system",
+    "send-to-all": "send message to all users",
 }
 
 
