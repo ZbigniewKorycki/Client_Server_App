@@ -30,21 +30,34 @@ while True:
         client_socket.send(username)
         password = input('Input password: ').encode("utf8")
         client_socket.send(password)
-        print(client_socket.recv(client.buffer).decode("utf8"))
+        if client_socket.recv(client.buffer).decode("utf8") == '"Correct_login_and_password"':
+            print(client_socket.recv(client.buffer).decode("utf8"))
+            while True:
+                command = input('Command inside: ').encode("utf8")
+                if command.decode("utf8") == 'send':
+                    client_socket.send(command)
+                    recipient = input('Message recipient: ').encode("utf8")
+                    client_socket.send(recipient)
+                    message = input('Message: ').encode("utf8")
+                    client_socket.send(message)
+                    print(client_socket.recv(client.buffer).decode("utf8"))
 
-    elif command.decode("utf8") == 'send':
-        client_socket.send(command)
-        recipient = input('Message recipient: ').encode("utf8")
-        client_socket.send(recipient)
-        message = input('Message: ').encode("utf8")
-        client_socket.send(message)
-        print(client_socket.recv(client.buffer).decode("utf8"))
+                elif command.decode("utf8") == 'send-to-all':
+                    client_socket.send(command)
+                    message = input('Message to all users: ').encode("utf8")
+                    client_socket.send(message)
+                    print(client_socket.recv(client.buffer).decode("utf8"))
 
-    elif command.decode("utf8") == 'send-to-all':
-        client_socket.send(command)
-        message = input('Message to all users: ').encode("utf8")
-        client_socket.send(message)
-        print(client_socket.recv(client.buffer).decode("utf8"))
+                elif command.decode("utf8") == 'logout':
+                    client_socket.send(command)
+                    print(client_socket.recv(client.buffer).decode("utf8"))
+                    break
+
+                else:
+                    client_socket.send(command)
+                    print(client_socket.recv(client.buffer).decode("utf8"))
+        else:
+            print(client_socket.recv(client.buffer).decode("utf8"))
 
     else:
         client_socket.send(command)

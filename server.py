@@ -15,7 +15,7 @@ while True:
 
     command = client_socket.recv(server.buffer).decode("utf8")
 
-    commands_list = ['help', 'info', 'uptime', 'stop', 'add-user', 'login', 'add-admin', 'send-to-all']
+    commands_list = ['help', 'info', 'uptime', 'stop', 'add-user', 'login', 'add-admin']
 
     if command in commands_list:
         if command == 'help':
@@ -49,11 +49,14 @@ while True:
             msg = output.encode("utf8")
             client_socket.send(msg)
 
-
         elif command == 'login':
             username = client_socket.recv(server.buffer).decode("utf8")
             password = client_socket.recv(server.buffer).decode("utf8")
             if server.login_into_system(username, password):
+                output = json.dumps("Correct_login_and_password", indent=4)
+                msg = output.encode("utf8")
+                client_socket.send(msg)
+
                 current_user = server.get_user_if_exists(username)
                 logged_user, inbox_info, commands_info = server.user_base_interface(current_user)
                 info_after_login = {
@@ -101,6 +104,9 @@ while True:
                         client_socket.send(msg)
 
             else:
+                output = json.dumps("Incorrect_login_password", indent=4)
+                msg = output.encode("utf8")
+                client_socket.send(msg)
                 output = json.dumps("Incorrect login or/and password", indent=4)
                 msg = output.encode("utf8")
                 client_socket.send(msg)
