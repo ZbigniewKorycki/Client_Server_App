@@ -7,6 +7,7 @@ commands_description = {
     "login": "opens the form to log in into system",
     "send": "send message to other user",
     "inbox": "open inbox with all received messages",
+    "add-admin": "add admin to system",
 }
 
 

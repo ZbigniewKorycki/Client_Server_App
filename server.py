@@ -15,7 +15,7 @@ while True:
 
     command = client_socket.recv(server.buffer).decode("utf8")
 
-    commands_list = ['help', 'info', 'uptime', 'stop', 'add-user', 'login']
+    commands_list = ['help', 'info', 'uptime', 'stop', 'add-user', 'login', 'add-admin']
 
     if command in commands_list:
         if command == 'help':
@@ -40,6 +40,12 @@ while True:
         elif command == 'add-user':
             username = client_socket.recv(server.buffer).decode("utf8")
             output = json.dumps(server.add_user(username), indent=4)
+            msg = output.encode("utf8")
+            client_socket.send(msg)
+
+        elif command == 'add-admin':
+            admin_name = client_socket.recv(server.buffer).decode("utf8")
+            output = json.dumps(server.add_user(admin_name, privilege="admin"), indent=4)
             msg = output.encode("utf8")
             client_socket.send(msg)
 

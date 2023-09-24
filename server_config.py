@@ -1,5 +1,5 @@
 from datetime import datetime
-from user import User
+from user_config import User
 import random
 import string
 
@@ -27,18 +27,19 @@ class Server:
             self.versions.append(new_version)
             return self.versions
 
-    def add_user(self, username):
+    def add_user(self, username, privilege="user"):
         if self.get_user_if_exists(username):
-            return "The username exists, choose another nickname."
+            return "The user with this name exists, choose another username."
         else:
+            user = User(username, privilege=privilege)
             user_with_password = {"username": username,
                                   "password": self.password_generator()
                                   }
-            user = User(username)
             self.users_with_passwords.append(user_with_password)
             self.users.append(user)
-            print(self.users_with_passwords)
-            return "The user has been successfully added."
+            print(user_with_password)
+            return f"The {privilege} has been successfully added."
+
 
     def password_generator(self):
         characters = string.ascii_letters + string.digits + string.punctuation
@@ -73,7 +74,8 @@ class Server:
         else:
             to_user = self.get_user_if_exists(recipient)
             if len(message) <= 255:
-                if to_user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER:
+                if (to_user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
+                        to_user.privilege == "admin"):
                     message_info = {"sender": sender.username, "recipient": recipient, "message": message,
                                     "date": datetime.now().strftime("%m/%d/%Y, %H:%M"), "status": "unread"}
                     to_user.inbox.insert(0, message_info)
@@ -83,7 +85,6 @@ class Server:
                     return "The recipient has reached the message limit in the inbox."
             else:
                 return "Message is too long (max. 255 characters)."
-
 
     def show_inbox(self, user):
         for message in user.inbox:
