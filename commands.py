@@ -1,11 +1,12 @@
 commands_description = {
-    "add-user": "add user to system",
+    "add-admin": "add admin to the system",
+    "add-user": "add user to the system",
     "help": "returns the list of available commands with a short description",
     "inbox": "open inbox with all received messages",
-    "info": "returns the version number of the server and the date it was created",
-    "login": "opens the form to log in into system",
-    "send": "send message to other user",
+    "info": "returns the server version number and date of creation",
+    "login": "opens the system login form",
+    "send": "send a message to another user",
     "send-to-all": "send message to all users",
-    "stop": "stops the server and the client simultaneously",
-    "uptime": "returns server uptime",
+    "stop": "stop server and client simultaneously",
+    "uptime": "returns the uptime of the server",
 }
