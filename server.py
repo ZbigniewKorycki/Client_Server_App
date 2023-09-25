@@ -39,7 +39,7 @@ while run_server:
                 available_commands = ['send', 'send-to-all', 'inbox', 'add-user', 'help', 'info', 'uptime', 'logout',
                                       'stop']
             else:
-                available_commands = ['inbox', 'send', 'logout']
+                available_commands = ['send', 'inbox', 'logout']
             output = json.dumps(available_commands, indent=4)
             msg = output.encode("utf8")
             client_socket.send(msg)
