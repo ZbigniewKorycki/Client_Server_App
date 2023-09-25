@@ -116,7 +116,4 @@ class Server:
         return user.inbox
 
     def check_if_admin(self, user):
-        if user.privilege == "admin":
-            return True
-        else:
-            return False
+        return user.privilege == "admin"

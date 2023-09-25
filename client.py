@@ -42,12 +42,6 @@ while True:
                     client_socket.send(username)
                     print(client_socket.recv(client.buffer).decode("utf8"))
 
-                elif command.decode("utf8") == 'add-admin':
-                    client_socket.send(command)
-                    admin_name = input('Input admin name: ').encode("utf8")
-                    client_socket.send(admin_name)
-                    print(client_socket.recv(client.buffer).decode("utf8"))
-
                 elif command.decode("utf8") == 'logout':
                     client_socket.send(command)
                     print(client_socket.recv(client.buffer).decode("utf8"))
@@ -56,8 +50,15 @@ while True:
                 else:
                     client_socket.send(command)
                     print(client_socket.recv(client.buffer).decode("utf8"))
+
         else:
             print(client_socket.recv(client.buffer).decode("utf8"))
+
+    elif command.decode("utf8") == 'add-admin':
+        client_socket.send(command)
+        admin_name = input('Input admin name: ').encode("utf8")
+        client_socket.send(admin_name)
+        print(client_socket.recv(client.buffer).decode("utf8"))
 
     else:
         client_socket.send(command)

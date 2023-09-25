@@ -36,7 +36,7 @@ while True:
             client_socket.send(msg)
             while True:
                 command = client_socket.recv(server.buffer).decode("utf8")
-                commands_list_all = ['help', 'info', 'uptime', 'stop', 'add-user', 'login', 'add-admin', 'logout',
+                commands_list_all = ['help', 'info', 'uptime', 'stop', 'add-user', 'login', 'logout',
                                      'send', 'send-to-all', 'inbox']
 
                 if command in commands_list_all:
@@ -75,12 +75,6 @@ while True:
                         msg = output.encode("utf8")
                         client_socket.send(msg)
 
-                    elif command == 'add-admin' and server.check_if_admin(current_user):
-                        admin_name = client_socket.recv(server.buffer).decode("utf8")
-                        output = json.dumps(server.add_user(admin_name, privilege="admin"), indent=4)
-                        msg = output.encode("utf8")
-                        client_socket.send(msg)
-
                     elif command == 'stop' and server.check_if_admin(current_user):
                         server_socket.close()
                         break
@@ -108,6 +102,13 @@ while True:
             output = json.dumps("Incorrect login or/and password", indent=4)
             msg = output.encode("utf8")
             client_socket.send(msg)
+
+    elif command == 'add-admin':
+        admin_name = client_socket.recv(server.buffer).decode("utf8")
+        output = json.dumps(server.add_user(admin_name, privilege="admin"), indent=4)
+        msg = output.encode("utf8")
+        client_socket.send(msg)
+
     else:
         message = "Incorrect command or you don't have permission to use it."
         output = json.dumps(message, indent=4)
