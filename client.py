@@ -8,23 +8,7 @@ client_socket.connect((client.host, client.port))
 
 while True:
     command = input('Command: ').encode("utf8")
-    if command.decode("utf8") == 'stop':
-        client_socket.send(command)
-        client_socket.close()
-        break
-    elif command.decode("utf8") == 'add-user':
-        client_socket.send(command)
-        username = input('Input username: ').encode("utf8")
-        client_socket.send(username)
-        print(client_socket.recv(client.buffer).decode("utf8"))
-
-    elif command.decode("utf8") == 'add-admin':
-        client_socket.send(command)
-        admin_name = input('Input admin name: ').encode("utf8")
-        client_socket.send(admin_name)
-        print(client_socket.recv(client.buffer).decode("utf8"))
-
-    elif command.decode("utf8") == 'login':
+    if command.decode("utf8") == 'login':
         client_socket.send(command)
         username = input('Input username: ').encode("utf8")
         client_socket.send(username)
@@ -34,7 +18,11 @@ while True:
             print(client_socket.recv(client.buffer).decode("utf8"))
             while True:
                 command = input('Command inside: ').encode("utf8")
-                if command.decode("utf8") == 'send':
+                if command.decode("utf8") == 'stop':
+                    client_socket.send(command)
+                    client_socket.close()
+                    break
+                elif command.decode("utf8") == 'send':
                     client_socket.send(command)
                     recipient = input('Message recipient: ').encode("utf8")
                     client_socket.send(recipient)
@@ -46,6 +34,18 @@ while True:
                     client_socket.send(command)
                     message = input('Message to all users: ').encode("utf8")
                     client_socket.send(message)
+                    print(client_socket.recv(client.buffer).decode("utf8"))
+
+                elif command.decode("utf8") == 'add-user':
+                    client_socket.send(command)
+                    username = input('Input username: ').encode("utf8")
+                    client_socket.send(username)
+                    print(client_socket.recv(client.buffer).decode("utf8"))
+
+                elif command.decode("utf8") == 'add-admin':
+                    client_socket.send(command)
+                    admin_name = input('Input admin name: ').encode("utf8")
+                    client_socket.send(admin_name)
                     print(client_socket.recv(client.buffer).decode("utf8"))
 
                 elif command.decode("utf8") == 'logout':

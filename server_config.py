@@ -114,3 +114,9 @@ class Server:
                 message["status"] = "read"
         user.unread_messages_in_inbox = 0
         return user.inbox
+
+    def check_if_admin(self, user):
+        if user.privilege == "admin":
+            return True
+        else:
+            return False
