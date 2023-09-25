@@ -65,8 +65,7 @@ class Server:
     def user_base_interface(self, user):
         logged_user = user.username
         inbox_info = f"In your inbox you have: {user.unread_messages_in_inbox} unread messages."
-        commands_info = "'send': Send message to other user, 'inbox': Open your inbox, 'logout': Log out from account"
-        return logged_user, inbox_info, commands_info
+        return logged_user, inbox_info
 
     def send_message(self, sender, recipient, message):
         if not self.get_user_if_exists(recipient):

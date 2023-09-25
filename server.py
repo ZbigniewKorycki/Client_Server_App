@@ -11,7 +11,8 @@ server_socket.listen(2)
 client_socket, address = server_socket.accept()
 print("Connection with the client.")
 
-while True:
+run_server = True
+while run_server:
 
     command = client_socket.recv(server.buffer).decode("utf8")
 
@@ -24,11 +25,10 @@ while True:
             client_socket.send(msg)
 
             current_user = server.get_user_if_exists(username)
-            logged_user, inbox_info, commands_info = server.user_base_interface(current_user)
+            logged_user, inbox_info = server.user_base_interface(current_user)
             info_after_login = {
                 "logged_user": logged_user,
                 "inbox_info": inbox_info,
-                "commands_info": commands_info
             }
 
             output = json.dumps(info_after_login, indent=4)
@@ -36,58 +36,56 @@ while True:
             client_socket.send(msg)
             while True:
                 command = client_socket.recv(server.buffer).decode("utf8")
-                commands_list_all = ['help', 'info', 'uptime', 'stop', 'add-user', 'login', 'logout',
-                                     'send', 'send-to-all', 'inbox']
 
-                if command in commands_list_all:
-                    if command == 'logout':
-                        output = json.dumps(f"User {username} logged out.", indent=4)
-                        msg = output.encode("utf8")
-                        client_socket.send(msg)
-                        break
+                if command == 'logout':
+                    output = json.dumps(f"User {username} logged out.", indent=4)
+                    msg = output.encode("utf8")
+                    client_socket.send(msg)
+                    break
 
-                    elif command == 'send':
-                        recipient = client_socket.recv(server.buffer).decode("utf8")
-                        message = client_socket.recv(server.buffer).decode("utf8")
-                        output = json.dumps(server.send_message(current_user, recipient, message), indent=4)
-                        msg = output.encode("utf8")
-                        client_socket.send(msg)
+                elif command == 'send':
+                    recipient = client_socket.recv(server.buffer).decode("utf8")
+                    message = client_socket.recv(server.buffer).decode("utf8")
+                    output = json.dumps(server.send_message(current_user, recipient, message), indent=4)
+                    msg = output.encode("utf8")
+                    client_socket.send(msg)
 
-                    elif command == 'send-to-all' and server.check_if_admin(current_user):
-                        message = client_socket.recv(server.buffer).decode("utf8")
-                        output = json.dumps(server.send_message_to_all(current_user, message), indent=4)
-                        msg = output.encode("utf8")
-                        client_socket.send(msg)
+                elif command == 'send-to-all' and server.check_if_admin(current_user):
+                    message = client_socket.recv(server.buffer).decode("utf8")
+                    output = json.dumps(server.send_message_to_all(current_user, message), indent=4)
+                    msg = output.encode("utf8")
+                    client_socket.send(msg)
 
-                    elif command == "inbox":
-                        output = json.dumps(server.show_inbox(current_user), indent=4)
-                        msg = output.encode("utf8")
-                        client_socket.send(msg)
+                elif command == "inbox":
+                    output = json.dumps(server.show_inbox(current_user), indent=4)
+                    msg = output.encode("utf8")
+                    client_socket.send(msg)
 
-                    elif command == 'info' and server.check_if_admin(current_user):
-                        output = json.dumps(server.versions, indent=4)
-                        msg = output.encode("utf8")
-                        client_socket.send(msg)
+                elif command == 'info' and server.check_if_admin(current_user):
+                    output = json.dumps(server.versions, indent=4)
+                    msg = output.encode("utf8")
+                    client_socket.send(msg)
 
-                    elif command == 'add-user' and server.check_if_admin(current_user):
-                        username = client_socket.recv(server.buffer).decode("utf8")
-                        output = json.dumps(server.add_user(username), indent=4)
-                        msg = output.encode("utf8")
-                        client_socket.send(msg)
+                elif command == 'add-user' and server.check_if_admin(current_user):
+                    username = client_socket.recv(server.buffer).decode("utf8")
+                    output = json.dumps(server.add_user(username), indent=4)
+                    msg = output.encode("utf8")
+                    client_socket.send(msg)
 
-                    elif command == 'stop' and server.check_if_admin(current_user):
-                        server_socket.close()
-                        break
+                elif command == 'stop' and server.check_if_admin(current_user):
+                    server_socket.close()
+                    run_server = False
+                    break
 
-                    elif command == 'uptime' and server.check_if_admin(current_user):
-                        output = json.dumps({"server_uptime": str(server.get_server_uptime())}, indent=4)
-                        msg = output.encode("utf8")
-                        client_socket.send(msg)
+                elif command == 'uptime' and server.check_if_admin(current_user):
+                    output = json.dumps({"server_uptime": str(server.get_server_uptime())}, indent=4)
+                    msg = output.encode("utf8")
+                    client_socket.send(msg)
 
-                    elif command == 'help' and server.check_if_admin(current_user):
-                        output = json.dumps(commands.commands_description, indent=4)
-                        msg = output.encode("utf8")
-                        client_socket.send(msg)
+                elif command == 'help' and server.check_if_admin(current_user):
+                    output = json.dumps(commands.commands_description, indent=4)
+                    msg = output.encode("utf8")
+                    client_socket.send(msg)
 
                 else:
                     message = "Incorrect command or you don't have permission to use it."
@@ -103,14 +101,18 @@ while True:
             msg = output.encode("utf8")
             client_socket.send(msg)
 
+
     elif command == 'add-admin':
         admin_name = client_socket.recv(server.buffer).decode("utf8")
         output = json.dumps(server.add_user(admin_name, privilege="admin"), indent=4)
         msg = output.encode("utf8")
         client_socket.send(msg)
 
+
     else:
         message = "Incorrect command or you don't have permission to use it."
         output = json.dumps(message, indent=4)
         msg = output.encode("utf8")
         client_socket.send(msg)
+
+
