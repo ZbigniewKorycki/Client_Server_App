@@ -40,7 +40,7 @@ class Server:
             self.users_with_passwords.append(user_with_password)
             self.users.append(user)
             print(user_with_password)
-            return f"The new user:{username} has been successfully added."
+            return f"The new user: {username} has been successfully added."
 
 
     def password_generator(self):
