@@ -1,5 +1,5 @@
 from datetime import datetime
-from user_config import User
+from user_logic import User
 import random
 import string
 

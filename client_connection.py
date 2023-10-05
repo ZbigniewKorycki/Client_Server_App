@@ -1,4 +1,4 @@
-from client_config import Client
+from client_logic import Client
 
 import socket
 

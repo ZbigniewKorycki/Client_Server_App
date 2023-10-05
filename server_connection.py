@@ -1,7 +1,7 @@
 import socket
 import commands
 import json
-from server_config import Server
+from server_logic import Server
 
 server = Server('192.168.0.163', 61033, 1024)
 

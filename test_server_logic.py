@@ -1,5 +1,5 @@
 import unittest
-from server_config import Server
+from server_logic import Server
 
 class TestServer(unittest.TestCase):
 
@@ -17,6 +17,9 @@ class TestServer(unittest.TestCase):
     def test_should_server_return_generated_password_with_at_least_8_random_symbols(self):
         result = len(set(self.server.password_generator()))
         self.assertGreaterEqual(result, 8)
+
+
+
 
 
 if __name__ == '__main__':
