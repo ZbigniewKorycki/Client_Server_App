@@ -30,6 +30,8 @@ class Server:
     def add_user(self, username, privilege="user"):
         if self.get_user_if_exists(username):
             return "The user with this name exists, choose another username."
+        elif not username[0].isalpha():
+            return "The user have to start with a letter."
         else:
             user = User(username, privilege=privilege)
             user_with_password = {"username": username,
@@ -38,7 +40,7 @@ class Server:
             self.users_with_passwords.append(user_with_password)
             self.users.append(user)
             print(user_with_password)
-            return f"The {privilege} has been successfully added."
+            return f"The new user:{username} has been successfully added."
 
 
     def password_generator(self):
