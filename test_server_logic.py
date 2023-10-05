@@ -31,6 +31,22 @@ class TestServerLogic(unittest.TestCase):
         result = self.server.add_user(username="Mario")
         self.assertEqual(result, 'The user with this name exists, choose another username.')
 
+    def test_should_login_in_with_correct_data(self):
+        new_user = self.server.add_user(username="Marek")
+        new_user_username = self.server.users_with_passwords[0]['username']
+        new_user_password = self.server.users_with_passwords[0]['password']
+        result = self.server.login_into_system(new_user_username, new_user_password)
+        self.assertTrue(result)
+
+    def test_should_login_in_with_incorrect_data(self):
+        new_user_username = "test_user"
+        new_user_password = "test_password"
+        result = self.server.login_into_system(new_user_username, new_user_password)
+        self.assertFalse(result)
+
+
+
+
 
 
 if __name__ == '__main__':
