@@ -1,5 +1,6 @@
 import unittest
 from server_logic import Server
+from user_logic import User
 
 
 class TestServerLogic(unittest.TestCase):
@@ -29,8 +30,8 @@ class TestServerLogic(unittest.TestCase):
 
     def test_should_server_dont_add_user_with_existed_username(self):
         self.server.add_user(username="Mario")
-        user_duplicate = self.server.add_user(username="Mario")
-        self.assertEqual(user_duplicate, 'The user with this name exists, choose another username.')
+        result = self.server.add_user(username="Mario")
+        self.assertEqual(result, 'The user with this name exists, choose another username.')
 
     def test_should_login_in_with_correct_data(self):
         self.server.add_user(username="Marek")
@@ -79,13 +80,22 @@ class TestServerLogic(unittest.TestCase):
                                           message="1" * 260)
         self.assertEqual(result, "Message is too long (max. 255 characters).")
 
-    def test_should_send_message(self):
+    def test_should_send_message_successfully(self):
         self.server.add_user(username="user1")
-        sender = self.server.get_user_if_exists(username="user1")
         self.server.add_user(username="user2")
+        sender = self.server.get_user_if_exists(username="user1")
         result = self.server.send_message(sender=sender, recipient_username="user2",
                                           message="test_message")
         self.assertEqual(result, "The message has been successfully sent.")
+
+    def test_should_not_find_non_existed_user(self):
+        result = self.server.get_user_if_exists(username="test_user")
+        self.assertFalse(result)
+
+    def test_should_find_existed_user(self):
+        self.server.add_user(username="test_user")
+        user_obj = self.server.get_user_if_exists(username="test_user")
+        self.assertIsInstance(user_obj, User)
 
 
 if __name__ == '__main__':
