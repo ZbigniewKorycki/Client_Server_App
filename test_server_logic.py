@@ -110,23 +110,30 @@ class TestServerLogic(unittest.TestCase):
         self.server.add_user("user1")
         self.server.add_user("user2")
         sender = self.server.get_user_if_exists(username="user1")
-        for _ in range(100):
+        for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 3):
             self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
         recipient = self.server.get_user_if_exists(username="user2")
         unread_messages = recipient.unread_messages_in_inbox
-        self.assertEqual(unread_messages,5)
+        self.assertEqual(unread_messages,User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
 
     def test_should_admin_recipient_have_only_more_than_5_unread_messages(self):
         self.server.add_user("user1")
         self.server.add_user("user2", privilege="admin")
         sender = self.server.get_user_if_exists(username="user1")
-        for _ in range(100):
+        for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 4):
             self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
         recipient = self.server.get_user_if_exists(username="user2")
         unread_messages = recipient.unread_messages_in_inbox
-        self.assertEqual(unread_messages,100)
+        self.assertEqual(unread_messages,User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 4)
 
-
+    def test_should_sender_gets_info_if_recipient_has_full_inbox(self):
+        self.server.add_user("user1")
+        self.server.add_user("user2")
+        sender = self.server.get_user_if_exists(username="user1")
+        for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER):
+            self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
+        result = self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
+        self.assertEqual(result, "The recipient has reached the message limit in the inbox.")
 
 if __name__ == '__main__':
     unittest.main()
