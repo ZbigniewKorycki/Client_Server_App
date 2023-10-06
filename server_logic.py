@@ -30,8 +30,16 @@ class Server:
     def add_user(self, username, privilege="user"):
         if self.get_user_if_exists(username):
             return "The user with this name exists, choose another username."
+        elif username == "":
+            error_message_empty_username = {
+                "Empty username": "The username must not be empty."
+            }
+            return error_message_empty_username
         elif not username[0].isalpha():
-            return "The user have to start with a letter."
+            error_message_start_with_alpha = {
+                "Incorrect username": "The username have to start with a letter (a-z/A-Z)."
+            }
+            return error_message_start_with_alpha
         else:
             user = User(username, privilege=privilege)
             user_with_password = {"username": username,

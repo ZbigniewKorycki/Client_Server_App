@@ -29,9 +29,15 @@ class TestServerLogic(unittest.TestCase):
         result = self.server.add_user(username="test_user", privilege="admin")
         self.assertIn("Success", result)
 
-    def test_should_server_dont_add_user_starts_with_no_alpha_symbol(self):
+    def test_dont_add_username_starts_with_no_alpha_symbol(self):
         result = self.server.add_user(username="1abc")
-        self.assertEqual(result, 'The user have to start with a letter.')
+        result1 = self.server.add_user(username="132455465")
+        self.assertIn("Incorrect username", result)
+        self.assertIn("Incorrect username", result1)
+
+    def test_dont_add_empty_username(self):
+        result = self.server.add_user(username="")
+        self.assertIn("Empty username", result)
 
     def test_should_server_dont_add_user_with_existed_username(self):
         self.server.add_user(username="Mario")
