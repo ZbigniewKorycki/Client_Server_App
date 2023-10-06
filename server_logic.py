@@ -69,18 +69,18 @@ class Server:
         inbox_info = f"In your inbox you have: {user.unread_messages_in_inbox} unread messages."
         return logged_user, inbox_info
 
-    def send_message(self, sender, recipient, message):
-        if not self.get_user_if_exists(recipient):
+    def send_message(self, sender, recipient_username, message):
+        if not self.get_user_if_exists(recipient_username):
             return "The recipient does not exist."
         else:
-            to_user = self.get_user_if_exists(recipient)
+            recipient_user = self.get_user_if_exists(recipient_username)
             if len(message) <= 255:
-                if (to_user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
-                        to_user.privilege == "admin"):
-                    message_info = {"sender": sender.username, "recipient": recipient, "message": message,
+                if (recipient_user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
+                        recipient_user.privilege == "admin"):
+                    message_info = {"sender": sender.username, "recipient": recipient_username, "message": message,
                                     "date": datetime.now().strftime("%m/%d/%Y, %H:%M"), "status": "unread"}
-                    to_user.inbox.insert(0, message_info)
-                    to_user.unread_messages_in_inbox += 1
+                    recipient_user.inbox.insert(0, message_info)
+                    recipient_user.unread_messages_in_inbox += 1
                     return "The message has been successfully sent."
                 else:
                     return "The recipient has reached the message limit in the inbox."
