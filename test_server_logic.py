@@ -1,6 +1,7 @@
 import unittest
 from server_logic import Server
 from user_logic import User
+from client_logic import Client
 
 
 class TestServerLogic(unittest.TestCase):
@@ -20,9 +21,13 @@ class TestServerLogic(unittest.TestCase):
         result = len(set(self.server.password_generator()))
         self.assertGreaterEqual(result, 8)
 
-    def test_should_server_add_user_with_correct_name(self):
-        result = self.server.add_user(username="Mario")
-        self.assertEqual(result, 'The new user: Mario has been successfully added.')
+    def test_add_user(self):
+        result = self.server.add_user(username="test_user")
+        self.assertIn("Success", result)
+
+    def test_add_admin(self):
+        result = self.server.add_user(username="test_user", privilege="admin")
+        self.assertIn("Success", result)
 
     def test_should_server_dont_add_user_starts_with_no_alpha_symbol(self):
         result = self.server.add_user(username="1abc")
@@ -104,7 +109,7 @@ class TestServerLogic(unittest.TestCase):
         self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
         recipient = self.server.get_user_if_exists(username="user2")
         messages_in_recipient_inbox = recipient.unread_messages_in_inbox
-        self.assertEqual(messages_in_recipient_inbox,1)
+        self.assertEqual(messages_in_recipient_inbox, 1)
 
     def test_should_user_recipient_have_only_5_unread_messages(self):
         self.server.add_user("user1")
@@ -114,7 +119,7 @@ class TestServerLogic(unittest.TestCase):
             self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
         recipient = self.server.get_user_if_exists(username="user2")
         unread_messages = recipient.unread_messages_in_inbox
-        self.assertEqual(unread_messages,User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
+        self.assertEqual(unread_messages, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
 
     def test_should_admin_recipient_have_only_more_than_5_unread_messages(self):
         self.server.add_user("user1")
@@ -124,9 +129,9 @@ class TestServerLogic(unittest.TestCase):
             self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
         recipient = self.server.get_user_if_exists(username="user2")
         unread_messages = recipient.unread_messages_in_inbox
-        self.assertEqual(unread_messages,User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 4)
+        self.assertEqual(unread_messages, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 4)
 
-    def test_should_sender_gets_info_if_recipient_has_full_inbox(self):
+    def test_should_sender_gets_info_when_recipient_has_full_inbox(self):
         self.server.add_user("user1")
         self.server.add_user("user2")
         sender = self.server.get_user_if_exists(username="user1")
@@ -134,6 +139,13 @@ class TestServerLogic(unittest.TestCase):
             self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
         result = self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
         self.assertEqual(result, "The recipient has reached the message limit in the inbox.")
+
+    def test_should_empty_inbox_returned(self):
+        self.server.add_user("user1")
+        user = self.server.get_user_if_exists(username="user1")
+        result = self.server.show_inbox(user)
+        self.assertEqual(result, [])
+
 
 if __name__ == '__main__':
     unittest.main()

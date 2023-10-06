@@ -40,8 +40,10 @@ class Server:
             self.users_with_passwords.append(user_with_password)
             self.users.append(user)
             print(user_with_password)
-            return f"The new user: {username} has been successfully added."
-
+            success_message = {
+                "Success": f"'{username}' has been added do userbase."
+            }
+            return success_message
 
     def password_generator(self):
         characters = string.ascii_letters + string.digits + string.punctuation
@@ -107,7 +109,6 @@ class Server:
         else:
             return "Message is too long (max. 255 characters)."
         return messages_stats
-
 
     def show_inbox(self, user):
         for message in user.inbox:
