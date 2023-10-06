@@ -97,6 +97,36 @@ class TestServerLogic(unittest.TestCase):
         user_obj = self.server.get_user_if_exists(username="test_user")
         self.assertIsInstance(user_obj, User)
 
+    def test_should_recipient_inbox_increase_of_1_after_getting_message(self):
+        self.server.add_user("user1")
+        self.server.add_user("user2")
+        sender = self.server.get_user_if_exists(username="user1")
+        self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
+        recipient = self.server.get_user_if_exists(username="user2")
+        messages_in_recipient_inbox = recipient.unread_messages_in_inbox
+        self.assertEqual(messages_in_recipient_inbox,1)
+
+    def test_should_user_recipient_have_only_5_unread_messages(self):
+        self.server.add_user("user1")
+        self.server.add_user("user2")
+        sender = self.server.get_user_if_exists(username="user1")
+        for _ in range(100):
+            self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
+        recipient = self.server.get_user_if_exists(username="user2")
+        unread_messages = recipient.unread_messages_in_inbox
+        self.assertEqual(unread_messages,5)
+
+    def test_should_admin_recipient_have_only_more_than_5_unread_messages(self):
+        self.server.add_user("user1")
+        self.server.add_user("user2", privilege="admin")
+        sender = self.server.get_user_if_exists(username="user1")
+        for _ in range(100):
+            self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
+        recipient = self.server.get_user_if_exists(username="user2")
+        unread_messages = recipient.unread_messages_in_inbox
+        self.assertEqual(unread_messages,100)
+
+
 
 if __name__ == '__main__':
     unittest.main()
