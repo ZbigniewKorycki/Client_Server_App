@@ -39,6 +39,13 @@ class TestServerLogic(unittest.TestCase):
         result = self.server.add_user(username="")
         self.assertIn("Empty username", result)
 
+    def test_dont_add_username_with_space(self):
+        result = self.server.add_user(username="test   user")
+        result1 = self.server.add_user(username="testuser      ")
+        self.assertIn("No space in username allowed", result)
+        self.assertIn("No space in username allowed", result1)
+
+
     def test_should_server_dont_add_user_with_existed_username(self):
         self.server.add_user(username="Mario")
         result = self.server.add_user(username="Mario")
