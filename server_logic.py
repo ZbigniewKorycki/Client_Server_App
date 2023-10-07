@@ -52,7 +52,7 @@ class Server:
                                   }
             self.users_with_passwords.append(user_with_password)
             self.users.append(user)
-            print(user_with_password)
+            # print(user_with_password)
             success_message = {
                 "Success": f"'{username}' has been added do userbase."
             }
@@ -86,7 +86,10 @@ class Server:
 
     def send_message(self, sender, recipient_username, message):
         if not self.get_user_if_exists(recipient_username):
-            return "The recipient does not exist."
+            error_message_no_recipient = {
+                "No recipient": "Recipient with given username don't exist."
+            }
+            return error_message_no_recipient
         else:
             recipient_user = self.get_user_if_exists(recipient_username)
             if len(message) <= 255:
@@ -100,7 +103,10 @@ class Server:
                 else:
                     return "The recipient has reached the message limit in the inbox."
             else:
-                return "Message is too long (max. 255 characters)."
+                error_message_over_255_characters = {
+                    "Character limit reached": "Message is too long (max. 255 characters)."
+                }
+                return error_message_over_255_characters
 
     def send_message_to_all(self, sender, message):
         messages_stats = []
