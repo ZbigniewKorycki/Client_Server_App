@@ -73,32 +73,18 @@ class TestServerLogic(unittest.TestCase):
         self.assertFalse(result1)
         self.assertFalse(result2)
 
-    def test_send_message_to_not_existed_recipient(self):
-        self.server.add_user(username="user1")
-        result = self.server.send_message(sender="user1", recipient_username="user2", message="test_message")
-        self.assertIn("No recipient", result)
-
-    def test_send_message_with_over_255_symbols(self):
+    def test_send_message(self):
         self.server.add_user(username="user1")
         self.server.add_user(username="user2")
         sender = self.server.get_user_if_exists(username="user1")
-        result = self.server.send_message(sender=sender, recipient_username="user2",
-                                          message="Lorem1_!" * 40)
-        result1 = self.server.send_message(sender=sender, recipient_username="user2",
-                                          message="1" * 260)
-        result2 = self.server.send_message(sender=sender, recipient_username="user2",
-                                           message=" " * 260)
-        self.assertIn("Character limit reached", result)
-        self.assertIn("Character limit reached", result1)
-        self.assertIn("Character limit reached", result2)
-
-    def test_send_message_successfully(self):
-        self.server.add_user(username="user1")
-        self.server.add_user(username="user2")
-        sender = self.server.get_user_if_exists(username="user1")
-        result = self.server.send_message(sender=sender, recipient_username="user2",
+        result_recipient_unknown = self.server.send_message(sender=sender, recipient_username="user_unknown", message="test_message")
+        result_success = self.server.send_message(sender=sender, recipient_username="user2",
                                           message="test_message")
-        self.assertIn("Message sent", result)
+        result_over_255 = self.server.send_message(sender=sender, recipient_username="user2",
+                                           message="L" * 256)
+        self.assertIn("No recipient", result_recipient_unknown)
+        self.assertIn("Message sent", result_success)
+        self.assertIn("Character limit reached", result_over_255)
 
     def test_should_not_find_non_existed_user(self):
         result = self.server.get_user_if_exists(username="test_user")
