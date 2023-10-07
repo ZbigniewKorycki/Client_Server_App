@@ -45,7 +45,6 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("No space in username allowed", result)
         self.assertIn("No space in username allowed", result1)
 
-
     def test_dont_add_user_with_existed_username(self):
         self.server.add_user(username="test_user")
         result = self.server.add_user(username="test_user")
@@ -56,27 +55,23 @@ class TestServerLogic(unittest.TestCase):
         user_password = self.server.users_with_passwords[0]['password']
         incorrect_user_username = "test_user"
         incorrect_user_password = "test_password"
-        result = self.server.login_into_system("Marek", user_password)
-        result1 = self.server.login_into_system(incorrect_user_username, user_password)
-        result2 = self.server.login_into_system("Marek", incorrect_user_password)
-        self.assertTrue(result)
-        self.assertFalse(result1)
-        self.assertFalse(result2)
+        result_correct_user_and_password = self.server.login_into_system("Marek", user_password)
+        result_incorrect_user_correct_password = self.server.login_into_system(incorrect_user_username, user_password)
+        result_correct_user_incorrect_password = self.server.login_into_system("Marek", incorrect_user_password)
+        self.assertTrue(result_correct_user_and_password)
+        self.assertFalse(result_incorrect_user_correct_password)
+        self.assertFalse(result_correct_user_incorrect_password)
 
     def test_recognize_admin_privilege(self):
         self.server.add_user(username="test_admin", privilege="admin")
+        self.server.add_user(username="test_admin_1", privilege="user")
+        self.server.add_user(username="test_admin_2", privilege="random_privilege")
         result = self.server.check_if_admin(self.server.users[0])
+        result1 = self.server.check_if_admin(self.server.users[1])
+        result2 = self.server.check_if_admin(self.server.users[2])
         self.assertTrue(result)
-
-    def test_recognize_if_no_admin_privilege_only_basic_user(self):
-        self.server.add_user(username="test_admin", privilege="user")
-        result = self.server.check_if_admin(self.server.users[0])
-        self.assertFalse(result)
-
-    def test_recognize_if_incorrect_privilege_given(self):
-        self.server.add_user(username="test_admin", privilege="random_privilege")
-        result = self.server.check_if_admin(self.server.users[0])
-        self.assertFalse(result)
+        self.assertFalse(result1)
+        self.assertFalse(result2)
 
     def test_send_message_to_not_existed_recipient(self):
         self.server.add_user(username="user1")
