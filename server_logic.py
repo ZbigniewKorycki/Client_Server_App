@@ -29,7 +29,10 @@ class Server:
 
     def add_user(self, username, privilege="user"):
         if self.get_user_if_exists(username):
-            return "The user with this name exists, choose another username."
+            error_message_user_duplicate = {
+                "User duplicate": "The user with this name exists already, choose another username."
+            }
+            return error_message_user_duplicate
         elif username == "":
             error_message_empty_username = {
                 "Empty username": "The username must not be empty."
@@ -54,7 +57,7 @@ class Server:
             self.users.append(user)
             # print(user_with_password)
             success_message = {
-                "Success": f"'{username}' has been added do userbase."
+                "User added": f"'{username}' has been successfully added do userbase."
             }
             return success_message
 
@@ -99,9 +102,15 @@ class Server:
                                     "date": datetime.now().strftime("%m/%d/%Y, %H:%M"), "status": "unread"}
                     recipient_user.inbox.insert(0, message_info)
                     recipient_user.unread_messages_in_inbox += 1
-                    return "The message has been successfully sent."
+                    success_message_sent = {
+                        "Message sent": "The message has been successfully sent."
+                    }
+                    return success_message_sent
                 else:
-                    return "The recipient has reached the message limit in the inbox."
+                    error_message_recipient_inbox_limit = {
+                        "Inbox limit": "The recipient has reached the message limit in the inbox."
+                    }
+                    return error_message_recipient_inbox_limit
             else:
                 error_message_over_255_characters = {
                     "Character limit reached": "Message is too long (max. 255 characters)."
@@ -126,7 +135,10 @@ class Server:
                 else:
                     continue
         else:
-            return "Message is too long (max. 255 characters)."
+            error_message_over_255_characters = {
+                "Character limit reached": "Message is too long (max. 255 characters)."
+            }
+            return error_message_over_255_characters
         return messages_stats
 
     def show_inbox(self, user):

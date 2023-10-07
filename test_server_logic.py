@@ -23,11 +23,11 @@ class TestServerLogic(unittest.TestCase):
 
     def test_add_user(self):
         result = self.server.add_user(username="test_user")
-        self.assertIn("Success", result)
+        self.assertIn("User added", result)
 
     def test_add_admin(self):
         result = self.server.add_user(username="test_user", privilege="admin")
-        self.assertIn("Success", result)
+        self.assertIn("User added", result)
 
     def test_dont_add_username_starts_with_no_alpha_symbol(self):
         result = self.server.add_user(username="1abc")
@@ -47,22 +47,21 @@ class TestServerLogic(unittest.TestCase):
 
 
     def test_dont_add_user_with_existed_username(self):
-        self.server.add_user(username="Mario")
-        result = self.server.add_user(username="Mario")
-        self.assertEqual(result, 'The user with this name exists, choose another username.')
+        self.server.add_user(username="test_user")
+        result = self.server.add_user(username="test_user")
+        self.assertIn("User duplicate", result)
 
-    def test_login_in_with_correct_data(self):
+    def test_login_in(self):
         self.server.add_user(username="Marek")
-        new_user_username = self.server.users_with_passwords[0]['username']
-        new_user_password = self.server.users_with_passwords[0]['password']
-        result = self.server.login_into_system(new_user_username, new_user_password)
+        user_password = self.server.users_with_passwords[0]['password']
+        incorrect_user_username = "test_user"
+        incorrect_user_password = "test_password"
+        result = self.server.login_into_system("Marek", user_password)
+        result1 = self.server.login_into_system(incorrect_user_username, user_password)
+        result2 = self.server.login_into_system("Marek", incorrect_user_password)
         self.assertTrue(result)
-
-    def test_login_in_with_incorrect_data(self):
-        new_user_username = "test_user"
-        new_user_password = "test_password"
-        result = self.server.login_into_system(new_user_username, new_user_password)
-        self.assertFalse(result)
+        self.assertFalse(result1)
+        self.assertFalse(result2)
 
     def test_recognize_admin_privilege(self):
         self.server.add_user(username="test_admin", privilege="admin")
@@ -104,7 +103,7 @@ class TestServerLogic(unittest.TestCase):
         sender = self.server.get_user_if_exists(username="user1")
         result = self.server.send_message(sender=sender, recipient_username="user2",
                                           message="test_message")
-        self.assertEqual(result, "The message has been successfully sent.")
+        self.assertIn("Message sent", result)
 
     def test_should_not_find_non_existed_user(self):
         result = self.server.get_user_if_exists(username="test_user")
@@ -151,7 +150,7 @@ class TestServerLogic(unittest.TestCase):
         for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER):
             self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
         result = self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
-        self.assertEqual(result, "The recipient has reached the message limit in the inbox.")
+        self.assertIn("Inbox limit", result)
 
     def test_should_empty_inbox_returned(self):
         self.server.add_user("user1")
