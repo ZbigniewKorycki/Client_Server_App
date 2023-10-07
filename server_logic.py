@@ -49,6 +49,8 @@ class Server:
             }
             return error_message_have_space
         else:
+            if privilege != "admin":
+                privilege = "user"
             user = User(username, privilege=privilege)
             user_with_password = {"username": username,
                                   "password": self.password_generator()
