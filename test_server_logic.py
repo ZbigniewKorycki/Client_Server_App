@@ -19,11 +19,15 @@ class TestServerLogic(unittest.TestCase):
 
     def test_add_user(self):
         result = self.server.add_user(username="test_user")
+        result_if_admin = self.server.check_if_admin(self.server.get_user_if_exists("test_user"))
         self.assertIn("User added", result)
+        self.assertFalse(result_if_admin)
 
     def test_add_admin(self):
         result = self.server.add_user(username="test_user", privilege="admin")
+        result_if_admin = self.server.check_if_admin(self.server.get_user_if_exists("test_user"))
         self.assertIn("User added", result)
+        self.assertTrue(result_if_admin)
 
     def test_dont_add_username_starts_with_no_alpha_symbol(self):
         result = self.server.add_user(username="1abc")
@@ -92,34 +96,26 @@ class TestServerLogic(unittest.TestCase):
         user_obj = self.server.get_user_if_exists(username="test_user")
         self.assertIsInstance(user_obj, User)
 
-    def test_should_recipient_inbox_increase_of_1_after_getting_message(self):
+
+    def test_recipient_inbox_user_privilege(self):
         self.server.add_user("user1")
         self.server.add_user("user2")
         sender = self.server.get_user_if_exists(username="user1")
         recipient = self.server.get_user_if_exists(username="user2")
-        self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
+        for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 2):
+            self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
         messages_in_recipient_inbox = recipient.unread_messages_in_inbox
-        self.assertEqual(messages_in_recipient_inbox, 1)
+        self.assertEqual(messages_in_recipient_inbox, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
 
-    def test_should_user_recipient_have_only_5_unread_messages(self):
+    def test_recipient_inbox_admin_privilege(self):
         self.server.add_user("user1")
-        self.server.add_user("user2")
+        self.server.add_user("user-admin", privilege="admin")
         sender = self.server.get_user_if_exists(username="user1")
-        recipient = self.server.get_user_if_exists(username="user2")
+        recipient_admin = self.server.get_user_if_exists(username="user-admin")
         for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 2):
-            self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
-        unread_messages = recipient.unread_messages_in_inbox
-        self.assertEqual(unread_messages, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
-
-    def test_should_admin_recipient_have_only_more_than_5_unread_messages(self):
-        self.server.add_user("user1")
-        self.server.add_user("user2", privilege="admin")
-        sender = self.server.get_user_if_exists(username="user1")
-        for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 2):
-            self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
-        recipient = self.server.get_user_if_exists(username="user2")
-        unread_messages = recipient.unread_messages_in_inbox
-        self.assertEqual(unread_messages, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 2)
+            self.server.send_message(sender=sender, recipient_username="user-admin", message="test_message")
+        messages_in_recipient_inbox = recipient_admin.unread_messages_in_inbox
+        self.assertEqual(messages_in_recipient_inbox, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER*2)
 
     def test_should_sender_gets_info_when_recipient_has_full_inbox(self):
         self.server.add_user("user1")
