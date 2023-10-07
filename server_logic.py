@@ -40,6 +40,11 @@ class Server:
                 "Incorrect username": "The username have to start with a letter (a-z/A-Z)."
             }
             return error_message_start_with_alpha
+        elif " " in username:
+            error_message_have_space = {
+                "No space in username allowed": "The username must not contain any space."
+            }
+            return error_message_have_space
         else:
             user = User(username, privilege=privilege)
             user_with_password = {"username": username,
