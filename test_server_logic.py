@@ -2,6 +2,7 @@ import unittest
 from server_logic import Server
 from user_logic import User
 import datetime
+import commands
 
 class TestServerLogic(unittest.TestCase):
 
@@ -183,7 +184,20 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("0 unread messages", inbox_info)
 
 
+class TestCommandsDescription(unittest.TestCase):
 
+    def test_commands_description(self):
+        result = commands.commands_description
+        self.assertIn("add-admin", result)
+        self.assertIn("add-user", result)
+        self.assertIn("help", result)
+        self.assertIn("inbox", result)
+        self.assertIn("info", result)
+        self.assertIn("login", result)
+        self.assertIn("send", result)
+        self.assertIn("send-to-all", result)
+        self.assertIn("stop", result)
+        self.assertIn("uptime", result)
 
 
 if __name__ == '__main__':
