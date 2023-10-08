@@ -96,7 +96,6 @@ class TestServerLogic(unittest.TestCase):
         user_obj = self.server.get_user_if_exists(username="test_user")
         self.assertIsInstance(user_obj, User)
 
-
     def test_recipient_inbox_user_privilege(self):
         self.server.add_user("user1")
         self.server.add_user("user2")
@@ -121,10 +120,13 @@ class TestServerLogic(unittest.TestCase):
         self.server.add_user("user1")
         self.server.add_user("user2")
         sender = self.server.get_user_if_exists(username="user1")
+        recipient = self.server.get_user_if_exists(username="user2")
         for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER):
             self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
-        result = self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
-        self.assertIn("Inbox limit", result)
+        result_message_over_limit = self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
+        messages_in_recipient_inbox = recipient.unread_messages_in_inbox
+        self.assertIn("Inbox limit", result_message_over_limit)
+        self.assertEqual(messages_in_recipient_inbox, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
 
     def test_should_empty_inbox_returned(self):
         self.server.add_user("user1")
