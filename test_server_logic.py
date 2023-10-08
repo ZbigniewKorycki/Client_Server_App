@@ -138,6 +138,26 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("Inbox limit", result_message_over_limit)
         self.assertEqual(messages_in_recipient_inbox, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
 
+    def test_send_message_to_all_users(self):
+        self.server.add_user("user-admin", privilege="admin")
+        for x in range(10):
+            self.server.add_user(f"user{x}")
+        sender = self.server.get_user_if_exists("user-admin")
+        result = self.server.send_message_to_all(sender, "test message")
+        self.assertEqual(len(result), 10)
+        self.assertIn("recipient", result[0])
+        self.assertIn("result", result[0])
+
+    def test_send_message_to_all_users_over_255_characters(self):
+        self.server.add_user("user-admin", privilege="admin")
+        for x in range(10):
+            self.server.add_user(f"user{x}")
+        sender = self.server.get_user_if_exists("user-admin")
+        result = self.server.send_message_to_all(sender, "M" * 256)
+        self.assertIn("Character limit reached", result)
+
+
+
     def test_should_empty_inbox_returned(self):
         self.server.add_user("user1")
         user = self.server.get_user_if_exists(username="user1")
