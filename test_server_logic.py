@@ -1,13 +1,23 @@
 import unittest
 from server_logic import Server
 from user_logic import User
-from client_logic import Client
-
+import datetime
 
 class TestServerLogic(unittest.TestCase):
 
     def setUp(self):
         self.server = Server('192.168.0.163', 61033, 1024)
+
+    def test_server_uptime(self):
+        result = self.server.get_server_uptime()
+        self.assertIsInstance(result, datetime.timedelta)
+
+    def test_add_server_version(self):
+        result = self.server.add_server_version("1.2.3")
+        for version in result[-1:0]:
+            self.assertEqual(version["version"],"1.2.3")
+            self.assertIn("version", version)
+            self.assertIn("version_date", version)
 
     def test_generated_password(self):
         password = self.server.password_generator()
