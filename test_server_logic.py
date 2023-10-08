@@ -157,12 +157,25 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("Character limit reached", result)
 
 
-
     def test_should_empty_inbox_returned(self):
         self.server.add_user("user1")
         user = self.server.get_user_if_exists(username="user1")
         result = self.server.show_inbox(user)
         self.assertEqual(result, [])
+
+    def test_should_inbox_shown_with_messages(self):
+        self.server.add_user("user1")
+        self.server.add_user("user2")
+        sender = self.server.get_user_if_exists(username="user1")
+        recipient = self.server.get_user_if_exists(username="user2")
+        self.server.send_message(sender, "user2", "test-message")
+        result = self.server.show_inbox(recipient)[0]
+        self.assertIn("message", result)
+        self.assertIn("recipient", result)
+        self.assertIn("sender", result)
+        self.assertIn("status", result)
+
+
 
 
 if __name__ == '__main__':
