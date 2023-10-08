@@ -175,6 +175,14 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("sender", result)
         self.assertIn("status", result)
 
+    def test_show_user_base_interface(self):
+        self.server.add_user("user1")
+        user1 = self.server.get_user_if_exists("user1")
+        logged_user, inbox_info = self.server.user_base_interface(user1)
+        self.assertEqual(logged_user, "user1")
+        self.assertIn("0 unread messages", inbox_info)
+
+
 
 
 
