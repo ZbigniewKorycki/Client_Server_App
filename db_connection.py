@@ -29,11 +29,11 @@ class PostgresSQLConnection:
         cursor = self.connection.cursor()
         cursor.execute(query, params)
         try:
-            result = cursor.fetchall()
+            fetched_data = cursor.fetchall()
         except psycopg2.ProgrammingError:
             return None
         else:
-            return result
+            return fetched_data
         finally:
             cursor.close()
 
@@ -45,15 +45,21 @@ class PostgresSQLConnection:
     def database_transaction(self, query, params=None):
         try:
             self.connect_with_db()
-            result = self.execute_query(query, params)
+            fetched_data = self.execute_query(query, params)
         except (Exception, psycopg2.DatabaseError) as error:
             print("Error in transaction. Reverting all other operations of a transaction ", error)
             self.connection.rollback()
         else:
             self.connection.commit()
-            return result
+            return fetched_data
         finally:
             self.close_connection_with_db()
+
+    # def fetched_to_json(self, fetched_data):
+    #     data_json = [dict(zip(columns, row) for row in fetched_data)]
+    #     return data_json
+
+
 
 
 

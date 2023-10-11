@@ -71,7 +71,7 @@ while run_server:
                     client_socket.send(msg)
 
                 elif command == 'info' and server.check_if_admin(current_user):
-                    output = json.dumps(server.versions, indent=4)
+                    output = json.dumps(server.get_server_versions(), indent=4, default=str)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 

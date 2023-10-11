@@ -13,7 +13,6 @@ class Server:
         self.creation_time = datetime.now()
         self.users_with_passwords = []
         self.users = []
-        self.versions = self.get_server_versions()
         self.add_server_version(start_version)
 
     def get_server_versions(self):
@@ -22,13 +21,14 @@ class Server:
                                             version VARCHAR(20) PRIMARY KEY,
                                             version_date TIMESTAMP);""")
         versions = db.database_transaction(query="""SELECT * FROM server_versions;""")
+        print(versions)
         return versions
 
     def add_server_version(self, version_num):
         db = PostgresSQLConnection()
         db.database_transaction(
             query="""INSERT INTO server_versions VALUES (%s, %s) ON CONFLICT (version) DO NOTHING;""",
-            params=(version_num, datetime.now().strftime("%m/%d/%Y, %H:%M")))
+            params=(version_num, str(datetime.now().strftime("%m/%d/%Y, %H:%M"))))
 
     def get_server_uptime(self):
         current_time = datetime.now()
@@ -65,7 +65,7 @@ class Server:
                                   }
             self.users_with_passwords.append(user_with_password)
             self.users.append(user)
-            # print(user_with_password)
+            print(user_with_password)
             success_message = {
                 "User added": f"'{username}' has been successfully added do userbase."
             }
