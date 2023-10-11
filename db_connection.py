@@ -55,9 +55,14 @@ class PostgresSQLConnection:
         finally:
             self.close_connection_with_db()
 
-    # def fetched_to_json(self, fetched_data):
-    #     data_json = [dict(zip(columns, row) for row in fetched_data)]
-    #     return data_json
+    def get_column_names(self, cursor):
+        try:
+            columns = [column[0] for column in cursor.description]
+        except TypeError:
+            return False
+        else:
+            return columns
+
 
 
 
