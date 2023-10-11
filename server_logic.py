@@ -11,31 +11,29 @@ class Server:
         self.port = port
         self.buffer = buffer
         self.creation_time = datetime.now()
-        self.versions = []
-        self.add_server_version(start_version)
         self.users_with_passwords = []
         self.users = []
-        self.versions_db = self.get_server_versions()
+        self.versions = self.get_server_versions()
+        self.add_server_version(start_version)
 
     def get_server_versions(self):
         db = PostgresSQLConnection()
         db.database_transaction(query="""CREATE TABLE IF NOT EXISTS server_versions (
                                             version VARCHAR(20) PRIMARY KEY,
                                             version_date TIMESTAMP);""")
-        result = db.database_transaction(query="""SELECT * FROM server_versions;""")
-        return result
+        versions = db.database_transaction(query="""SELECT * FROM server_versions;""")
+        return versions
+
+    def add_server_version(self, version_num):
+        db = PostgresSQLConnection()
+        db.database_transaction(
+            query="""INSERT INTO server_versions VALUES (%s, %s) ON CONFLICT (version) DO NOTHING;""",
+            params=(version_num, datetime.now().strftime("%m/%d/%Y, %H:%M")))
 
     def get_server_uptime(self):
         current_time = datetime.now()
         server_uptime = current_time - self.creation_time
         return server_uptime
-
-    def add_server_version(self, version_num):
-        if version_num not in self.versions:
-            new_version = {"version": version_num,
-                           "version_date": datetime.now().strftime("%m/%d/%Y, %H:%M")}
-            self.versions.append(new_version)
-            return self.versions
 
     def add_user(self, username, privilege="user"):
         if self.get_user_if_exists(username):
