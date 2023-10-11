@@ -28,16 +28,21 @@ class PostgresSQLConnection:
         self.connection.autocommit = False
         cursor = self.connection.cursor()
         cursor.execute(query, params)
-        result = cursor.fetchall()
-        cursor.close()
-        return result
+        try:
+            result = cursor.fetchall()
+        except psycopg2.ProgrammingError:
+            return None
+        else:
+            return result
+        finally:
+            cursor.close()
 
     def close_connection_with_db(self):
         if self.connection:
             self.connection.close()
             self.connection = None
 
-    def database_transaction(self, query, params):
+    def database_transaction(self, query, params=None):
         try:
             self.connect_with_db()
             result = self.execute_query(query, params)
