@@ -37,4 +37,20 @@ class PostgresSQLConnection:
             self.connection.close()
             self.connection = None
 
+    def database_transaction(self, query, params):
+        try:
+            self.connect_with_db()
+            result = self.execute_query(query, params)
+        except (Exception, psycopg2.DatabaseError) as error:
+            print("Error in transaction. Reverting all other operations of a transaction ", error)
+            self.connection.rollback()
+        else:
+            self.connection.commit()
+            return result
+        finally:
+            self.close_connection_with_db()
+
+
+
+
 
