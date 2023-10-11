@@ -2,6 +2,7 @@ from datetime import datetime
 from user_logic import User
 import random
 import string
+from db_connection import PostgresSQLConnection
 
 
 class Server:
@@ -14,6 +15,15 @@ class Server:
         self.add_server_version(start_version)
         self.users_with_passwords = []
         self.users = []
+        self.versions_db = self.get_server_versions()
+
+    def get_server_versions(self):
+        db = PostgresSQLConnection()
+        db.database_transaction(query="""CREATE TABLE IF NOT EXISTS server_versions (
+                                            version VARCHAR(20) PRIMARY KEY,
+                                            version_date TIMESTAMP);""")
+        result = db.database_transaction(query="""SELECT * FROM server_versions;""")
+        return result
 
     def get_server_uptime(self):
         current_time = datetime.now()
