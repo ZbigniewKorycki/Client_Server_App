@@ -1,9 +1,10 @@
 from datetime import datetime
-from user_logic import User
 import random
 import string
+from user_logic import User
 from db_connection import PostgresSQLConnection
 
+INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER = 5
 
 class Server:
     def __init__(self, host, port, buffer, start_version="0.1.0"):
@@ -38,7 +39,6 @@ class Server:
                                                                         read_by_recipient BOOLEAN DEFAULT false NOT NULL
                                                                         );""")
 
-
     def get_server_versions(self):
         versions = self.db.database_transaction(query="""SELECT * FROM server_versions;""")
         print(versions)
@@ -55,7 +55,7 @@ class Server:
         return server_uptime
 
     def add_user(self, username, privilege="user"):
-        if self.get_user_if_exists(username):
+        if self.check_if_username_exists(username):
             error_message_user_duplicate = {
                 "User duplicate": "The user with this name exists already, choose another username."
             }
@@ -78,18 +78,13 @@ class Server:
         else:
             if privilege != "admin":
                 privilege = "user"
-            user = User(username, privilege=privilege)
             password = self.password_generator()
             self.db.database_transaction(query="""INSERT INTO users_passwords VALUES (%s, %s);""",
                                          params=(username, password))
             self.db.database_transaction(query="""INSERT INTO users_privileges VALUES (%s, %s);""",
                                          params=(username, privilege))
-            user_with_password = {"username": username,
-                                  "password": password
-                                  }
-            self.users_with_passwords.append(user_with_password)
-            self.users.append(user)
-            print(user_with_password)
+
+            print(password)
             success_message = {
                 "User added": f"'{username}' has been successfully added do database."
             }
@@ -108,46 +103,38 @@ class Server:
             return True
         else:
             return False
-        # try:
-        #     self.users_with_passwords.index({"username": username,
-        #                                      "password": password
-        #                                      })
-        # except ValueError:
-        #     return False
-        # else:
-        #     return True
 
-    def get_user_if_exists(self, username):
-        for user in self.users:
-            if user.username == username:
-                return user
-        return False
+    def check_if_username_exists(self, username):
+        result = self.db.database_transaction(
+            query="""SELECT COUNT(*) FROM users_privileges WHERE username = %s;""",
+            params=(username,))
+        # output from result in format [(1,)] if username exists or [(0,)] if not exists
+        if result[0][0]:
+            return True
+        else:
+            return False
 
     def user_base_interface(self, username):
         inbox_info = f"In your inbox you have: xxxxxxxxxx unread messages."
         return username, inbox_info
 
-    def send_message(self, sender, recipient_username, message):
-        if not self.get_user_if_exists(recipient_username):
+    def send_message(self, sender_username, recipient_username, message):
+        if not self.check_if_username_exists(recipient_username):
             error_message_no_recipient = {
                 "No recipient": "Recipient with given username don't exist."
             }
             return error_message_no_recipient
         else:
-            recipient_user = self.get_user_if_exists(recipient_username)
             if len(message) <= 255:
-                if (recipient_user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
-                        recipient_user.privilege == "admin"):
+                if (self.count_unread_messages_in_username_inbox(
+                        recipient_username) < INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
+                        self.check_if_user_has_admin_privilege(recipient_username)):
                     self.db.database_transaction(query="""INSERT INTO users_messages(sender_username, recipient_username, message_content, sending_date)
                                     VALUES (%s, %s, %s, %s);""", params=(
-                        sender.username,
+                        sender_username,
                         recipient_username,
                         message,
                         datetime.now().strftime("%m/%d/%Y, %H:%M")))
-                    message_info = {"sender": sender.username, "recipient": recipient_username, "message": message,
-                                    "date": datetime.now().strftime("%m/%d/%Y, %H:%M"), "status": "unread"}
-                    recipient_user.inbox.insert(0, message_info)
-                    recipient_user.unread_messages_in_inbox += 1
                     success_message_sent = {
                         "Message sent": "The message has been successfully sent."
                     }
@@ -163,26 +150,23 @@ class Server:
                 }
                 return error_message_over_255_characters
 
-    def send_message_to_all(self, sender, message):
+    def send_message_to_all(self, sender_username, message):
         messages_stats = []
         if len(message) <= 255:
-            for recipient in self.users:
-                if recipient != sender:
-                    if (recipient.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
-                            recipient.privilege == "admin"):
+            for recipient_username in self.get_all_users_list():
+                if recipient_username != sender_username:
+                    if (self.count_unread_messages_in_username_inbox(
+                            recipient_username) < INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
+                            self.check_if_user_has_admin_privilege(recipient_username)):
                         self.db.database_transaction(query="""INSERT INTO users_messages(sender_username, recipient_username, message_content, sending_date)
                                                             VALUES (%s, %s, %s, %s);""", params=(
-                            sender.username,
-                            recipient.username,
+                            sender_username,
+                            recipient_username,
                             message,
                             datetime.now().strftime("%m/%d/%Y, %H:%M")))
-                        message_info = {"sender": sender.username, "recipient": recipient.username, "message": message,
-                                        "date": datetime.now().strftime("%m/%d/%Y, %H:%M"), "status": "unread"}
-                        recipient.inbox.insert(0, message_info)
-                        recipient.unread_messages_in_inbox += 1
-                        result = {"recipient": recipient.username, "result": "Message successfully sent."}
+                        result = {"recipient": recipient_username, "result": "Message successfully sent."}
                     else:
-                        result = {"recipient": recipient.username, "result": "Not sent. Inbox limit reached."}
+                        result = {"recipient": recipient_username, "result": "Not sent. Inbox limit reached."}
                     messages_stats.append(result)
                 else:
                     continue
@@ -201,17 +185,25 @@ class Server:
             query="""SELECT FROM users_messages WHERE recipient_username = %s;""",
             params=(user.username,))
         return messages
-        # for message in user.inbox:
-        #     if message["status"] == "unread":
-        #         message["status"] = "read"
-        # user.unread_messages_in_inbox = 0
-        # return user.inbox
 
-    def check_if_admin(self, username):
-        result = self.db.database_transaction(query="""SELECT COUNT(*) FROM users_privileges WHERE username = %s AND privilege = %s;""",
+    def check_if_user_has_admin_privilege(self, username):
+        result = self.db.database_transaction(
+            query="""SELECT COUNT(*) FROM users_privileges WHERE username = %s AND privilege = %s;""",
             params=(username, "admin"))
-        # output from result in format [(1,)] or [(0,)]
+        # output from result in format [(1,)] if user has admin privileges or [(0,)] if don't
         if result[0][0]:
             return True
         else:
             return False
+
+    def count_unread_messages_in_username_inbox(self, username):
+        unread_messages = self.db.database_transaction(
+            query="""SELECT COUNT(*) FROM users_messages WHERE recipient_username = %s AND read_by_recipient = %s;""",
+            params=(username, False))
+        # output from result in format [(N,)] where N is numer of unread messages
+        return unread_messages
+
+    def get_all_users_list(self):
+        users = self.db.database_transaction(
+            query="""SELECT username FROM users_privileges;""")
+        return users
