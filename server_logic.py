@@ -14,12 +14,28 @@ class Server:
         self.users_with_passwords = []
         self.users = []
         self.db = PostgresSQLConnection()
+        self.create_db_tables()
         self.add_server_version(start_version)
 
-    def get_server_versions(self):
+    def create_db_tables(self):
         self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS server_versions (
-                                            version VARCHAR(20) PRIMARY KEY,
-                                            version_date TIMESTAMP);""")
+                                                    version VARCHAR(20) PRIMARY KEY,
+                                                    version_date TIMESTAMP);""")
+        self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_passwords (
+                                                                                    username VARCHAR PRIMARY KEY,
+                                                                                    password VARCHAR NOT NULL
+                                                                                    );""")
+        self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_messages (
+                                                                        message_id SERIAL PRIMARY KEY,
+                                                                        sender_username VARCHAR NOT NULL,
+                                                                        recipient_username VARCHAR NOT NULL,
+                                                                        message_content VARCHAR(255) NOT NULL,
+                                                                        sending_date TIMESTAMP NOT NULL,
+                                                                        read_by_recipient BOOLEAN DEFAULT false NOT NULL
+                                                                        );""")
+
+
+    def get_server_versions(self):
         versions = self.db.database_transaction(query="""SELECT * FROM server_versions;""")
         print(versions)
         return versions
@@ -60,10 +76,6 @@ class Server:
                 privilege = "user"
             user = User(username, privilege=privilege)
             password = self.password_generator()
-            self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_passwords (
-                                                                            username VARCHAR PRIMARY KEY,
-                                                                            password VARCHAR NOT NULL
-                                                                            );""")
             self.db.database_transaction(query="""INSERT INTO users_passwords VALUES (%s, %s);""",
                                          params=(username, password))
             user_with_password = {"username": username,
@@ -114,14 +126,6 @@ class Server:
             if len(message) <= 255:
                 if (recipient_user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
                         recipient_user.privilege == "admin"):
-                    self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_messages (
-                                                                id SERIAL PRIMARY KEY,
-                                                                sender_username VARCHAR NOT NULL,
-                                                                recipient_username VARCHAR NOT NULL,
-                                                                message_content VARCHAR(255) NOT NULL,
-                                                                sending_date TIMESTAMP NOT NULL,
-                                                                read_by_recipient BOOLEAN DEFAULT false NOT NULL
-                                                                );""")
                     self.db.database_transaction(query="""INSERT INTO users_messages(sender_username, recipient_username, message_content, sending_date)
                                     VALUES (%s, %s, %s, %s);""", params=(
                         sender.username,
@@ -154,14 +158,6 @@ class Server:
                 if recipient != sender:
                     if (recipient.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
                             recipient.privilege == "admin"):
-                        self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_messages (
-                                                                                        id SERIAL PRIMARY KEY,
-                                                                                        sender_username VARCHAR NOT NULL,
-                                                                                        recipient_username VARCHAR NOT NULL,
-                                                                                        message_content VARCHAR(255) NOT NULL,
-                                                                                        sending_date TIMESTAMP NOT NULL,
-                                                                                        read_by_recipient BOOLEAN DEFAULT false NOT NULL
-                                                                                        );""")
                         self.db.database_transaction(query="""INSERT INTO users_messages(sender_username, recipient_username, message_content, sending_date)
                                                             VALUES (%s, %s, %s, %s);""", params=(
                             sender.username,
@@ -189,12 +185,15 @@ class Server:
         self.db.database_transaction(
             query="""UPDATE users_messages SET read_by_recipient = true WHERE recipient_username = %s;""",
             params=(user.username,))
-        print(user.username)
-        for message in user.inbox:
-            if message["status"] == "unread":
-                message["status"] = "read"
-        user.unread_messages_in_inbox = 0
-        return user.inbox
+        messages = self.db.database_transaction(
+            query="""SELECT FROM users_messages WHERE recipient_username = %s;""",
+            params=(user.username,))
+        return messages
+        # for message in user.inbox:
+        #     if message["status"] == "unread":
+        #         message["status"] = "read"
+        # user.unread_messages_in_inbox = 0
+        # return user.inbox
 
     def check_if_admin(self, user):
         return user.privilege == "admin"
