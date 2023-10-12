@@ -1,10 +1,10 @@
 from datetime import datetime
 import random
 import string
-from user_logic import User
 from db_connection import PostgresSQLConnection
 
 INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER = 5
+
 
 class Server:
     def __init__(self, host, port, buffer, start_version="0.1.0"):
@@ -12,8 +12,6 @@ class Server:
         self.port = port
         self.buffer = buffer
         self.creation_time = datetime.now()
-        self.users_with_passwords = []
-        self.users = []
         self.db = PostgresSQLConnection()
         self.create_db_tables()
         self.add_server_version(start_version)
@@ -177,13 +175,15 @@ class Server:
             return error_message_over_255_characters
         return messages_stats
 
-    def show_inbox(self, user):
+    def show_inbox(self, username):
         self.db.database_transaction(
             query="""UPDATE users_messages SET read_by_recipient = true WHERE recipient_username = %s;""",
-            params=(user.username,))
+            params=(username,))
         messages = self.db.database_transaction(
-            query="""SELECT FROM users_messages WHERE recipient_username = %s;""",
-            params=(user.username,))
+            query="""SELECT sender_username, message_content,sending_date
+             FROM users_messages WHERE recipient_username = %s;""",
+            params=(username,))
+        print(messages)
         return messages
 
     def check_if_user_has_admin_privilege(self, username):
@@ -197,13 +197,16 @@ class Server:
             return False
 
     def count_unread_messages_in_username_inbox(self, username):
-        unread_messages = self.db.database_transaction(
+        result = self.db.database_transaction(
             query="""SELECT COUNT(*) FROM users_messages WHERE recipient_username = %s AND read_by_recipient = %s;""",
             params=(username, False))
         # output from result in format [(N,)] where N is numer of unread messages
+        unread_messages = result[0][0]
         return unread_messages
 
     def get_all_users_list(self):
-        users = self.db.database_transaction(
+
+        result = self.db.database_transaction(
             query="""SELECT username FROM users_privileges;""")
-        return users
+        users_list = [user[0] for user in result]
+        return users_list
