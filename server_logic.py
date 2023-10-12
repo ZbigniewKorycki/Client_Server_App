@@ -13,20 +13,19 @@ class Server:
         self.creation_time = datetime.now()
         self.users_with_passwords = []
         self.users = []
+        self.db = PostgresSQLConnection()
         self.add_server_version(start_version)
 
     def get_server_versions(self):
-        db = PostgresSQLConnection()
-        db.database_transaction(query="""CREATE TABLE IF NOT EXISTS server_versions (
+        self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS server_versions (
                                             version VARCHAR(20) PRIMARY KEY,
                                             version_date TIMESTAMP);""")
-        versions = db.database_transaction(query="""SELECT * FROM server_versions;""")
+        versions = self.db.database_transaction(query="""SELECT * FROM server_versions;""")
         print(versions)
         return versions
 
     def add_server_version(self, version_num):
-        db = PostgresSQLConnection()
-        db.database_transaction(
+        self.db.database_transaction(
             query="""INSERT INTO server_versions VALUES (%s, %s) ON CONFLICT (version) DO NOTHING;""",
             params=(version_num, str(datetime.now().strftime("%m/%d/%Y, %H:%M"))))
 
@@ -108,8 +107,7 @@ class Server:
             if len(message) <= 255:
                 if (recipient_user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
                         recipient_user.privilege == "admin"):
-                    db = PostgresSQLConnection()
-                    db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_messages (
+                    self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_messages (
                                                                 id SERIAL PRIMARY KEY,
                                                                 sender_username VARCHAR NOT NULL,
                                                                 recipient_username VARCHAR NOT NULL,
@@ -117,14 +115,12 @@ class Server:
                                                                 sending_date TIMESTAMP NOT NULL,
                                                                 read_by_recipient BOOLEAN DEFAULT false NOT NULL
                                                                 );""")
-                    db.database_transaction(
-                        query="""INSERT INTO users_messages
-                                    (sender_username, recipient_username, message_content, sending_date)
+                    self.db.database_transaction(query="""INSERT INTO users_messages(sender_username, recipient_username, message_content, sending_date)
                                     VALUES (%s, %s, %s, %s);""", params=(
-                            sender.username,
-                            recipient_username,
-                            message,
-                            datetime.now().strftime("%m/%d/%Y, %H:%M")))
+                        sender.username,
+                        recipient_username,
+                        message,
+                        datetime.now().strftime("%m/%d/%Y, %H:%M")))
                     message_info = {"sender": sender.username, "recipient": recipient_username, "message": message,
                                     "date": datetime.now().strftime("%m/%d/%Y, %H:%M"), "status": "unread"}
                     recipient_user.inbox.insert(0, message_info)
@@ -147,17 +143,31 @@ class Server:
     def send_message_to_all(self, sender, message):
         messages_stats = []
         if len(message) <= 255:
-            for user in self.users:
-                if user != sender:
-                    if (user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
-                            user.privilege == "admin"):
-                        message_info = {"sender": sender.username, "recipient": user.username, "message": message,
+            for recipient in self.users:
+                if recipient != sender:
+                    if (recipient.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
+                            recipient.privilege == "admin"):
+                        self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_messages (
+                                                                                        id SERIAL PRIMARY KEY,
+                                                                                        sender_username VARCHAR NOT NULL,
+                                                                                        recipient_username VARCHAR NOT NULL,
+                                                                                        message_content VARCHAR(255) NOT NULL,
+                                                                                        sending_date TIMESTAMP NOT NULL,
+                                                                                        read_by_recipient BOOLEAN DEFAULT false NOT NULL
+                                                                                        );""")
+                        self.db.database_transaction(query="""INSERT INTO users_messages(sender_username, recipient_username, message_content, sending_date)
+                                                            VALUES (%s, %s, %s, %s);""", params=(
+                            sender.username,
+                            recipient.username,
+                            message,
+                            datetime.now().strftime("%m/%d/%Y, %H:%M")))
+                        message_info = {"sender": sender.username, "recipient": recipient.username, "message": message,
                                         "date": datetime.now().strftime("%m/%d/%Y, %H:%M"), "status": "unread"}
-                        user.inbox.insert(0, message_info)
-                        user.unread_messages_in_inbox += 1
-                        result = {"recipient": user.username, "result": "Message successfully sent."}
+                        recipient.inbox.insert(0, message_info)
+                        recipient.unread_messages_in_inbox += 1
+                        result = {"recipient": recipient.username, "result": "Message successfully sent."}
                     else:
-                        result = {"recipient": user.username, "result": "Not sent. Inbox limit reached."}
+                        result = {"recipient": recipient.username, "result": "Not sent. Inbox limit reached."}
                     messages_stats.append(result)
                 else:
                     continue
@@ -169,6 +179,10 @@ class Server:
         return messages_stats
 
     def show_inbox(self, user):
+        self.db.database_transaction(
+            query="""UPDATE users_messages SET read_by_recipient = true WHERE recipient_username = %s;""",
+            params=(user.username,))
+        print(user.username)
         for message in user.inbox:
             if message["status"] == "unread":
                 message["status"] = "read"
