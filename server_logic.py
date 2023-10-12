@@ -123,10 +123,9 @@ class Server:
                 return user
         return False
 
-    def user_base_interface(self, user):
-        logged_user = user.username
-        inbox_info = f"In your inbox you have: {user.unread_messages_in_inbox} unread messages."
-        return logged_user, inbox_info
+    def user_base_interface(self, username):
+        inbox_info = f"In your inbox you have: xxxxxxxxxx unread messages."
+        return username, inbox_info
 
     def send_message(self, sender, recipient_username, message):
         if not self.get_user_if_exists(recipient_username):
@@ -208,5 +207,11 @@ class Server:
         # user.unread_messages_in_inbox = 0
         # return user.inbox
 
-    def check_if_admin(self, user):
-        return user.privilege == "admin"
+    def check_if_admin(self, username):
+        result = self.db.database_transaction(query="""SELECT COUNT(*) FROM users_privileges WHERE username = %s AND privilege = %s;""",
+            params=(username, "admin"))
+        # output from result in format [(1,)] or [(0,)]
+        if result[0][0]:
+            return True
+        else:
+            return False
