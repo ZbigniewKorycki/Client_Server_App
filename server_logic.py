@@ -21,6 +21,10 @@ class Server:
         self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS server_versions (
                                                     version VARCHAR(20) PRIMARY KEY,
                                                     version_date TIMESTAMP);""")
+        self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_privileges (
+                                                                                    username VARCHAR PRIMARY KEY,
+                                                                                    privilege VARCHAR NOT NULL DEFAULT user
+                                                                                    );""")
         self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_passwords (
                                                                                     username VARCHAR PRIMARY KEY,
                                                                                     password VARCHAR NOT NULL
@@ -78,6 +82,8 @@ class Server:
             password = self.password_generator()
             self.db.database_transaction(query="""INSERT INTO users_passwords VALUES (%s, %s);""",
                                          params=(username, password))
+            self.db.database_transaction(query="""INSERT INTO users_privileges VALUES (%s, %s);""",
+                                         params=(username, privilege))
             user_with_password = {"username": username,
                                   "password": password
                                   }
@@ -85,7 +91,7 @@ class Server:
             self.users.append(user)
             print(user_with_password)
             success_message = {
-                "User added": f"'{username}' has been successfully added do userbase."
+                "User added": f"'{username}' has been successfully added do database."
             }
             return success_message
 
@@ -95,14 +101,21 @@ class Server:
         return password
 
     def login_into_system(self, username, password):
-        try:
-            self.users_with_passwords.index({"username": username,
-                                             "password": password
-                                             })
-        except ValueError:
-            return False
-        else:
+        result = self.db.database_transaction(
+            query="""SELECT FROM users_passwords WHERE username = %s AND password = %s;""",
+            params=(username, password))
+        if result:
             return True
+        else:
+            return False
+        # try:
+        #     self.users_with_passwords.index({"username": username,
+        #                                      "password": password
+        #                                      })
+        # except ValueError:
+        #     return False
+        # else:
+        #     return True
 
     def get_user_if_exists(self, username):
         for user in self.users:
