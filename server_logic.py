@@ -108,6 +108,23 @@ class Server:
             if len(message) <= 255:
                 if (recipient_user.unread_messages_in_inbox < User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
                         recipient_user.privilege == "admin"):
+                    db = PostgresSQLConnection()
+                    db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_messages (
+                                                                id SERIAL PRIMARY KEY,
+                                                                sender_username VARCHAR NOT NULL,
+                                                                recipient_username VARCHAR NOT NULL,
+                                                                message_content VARCHAR(255) NOT NULL,
+                                                                sending_date TIMESTAMP NOT NULL,
+                                                                read_by_recipient BOOLEAN DEFAULT false NOT NULL
+                                                                );""")
+                    db.database_transaction(
+                        query="""INSERT INTO users_messages
+                                    (sender_username, recipient_username, message_content, sending_date)
+                                    VALUES (%s, %s, %s, %s);""", params=(
+                            sender.username,
+                            recipient_username,
+                            message,
+                            datetime.now().strftime("%m/%d/%Y, %H:%M")))
                     message_info = {"sender": sender.username, "recipient": recipient_username, "message": message,
                                     "date": datetime.now().strftime("%m/%d/%Y, %H:%M"), "status": "unread"}
                     recipient_user.inbox.insert(0, message_info)
