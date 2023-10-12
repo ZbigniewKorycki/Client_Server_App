@@ -59,8 +59,15 @@ class Server:
             if privilege != "admin":
                 privilege = "user"
             user = User(username, privilege=privilege)
+            password = self.password_generator()
+            self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_passwords (
+                                                                            username VARCHAR PRIMARY KEY,
+                                                                            password VARCHAR NOT NULL
+                                                                            );""")
+            self.db.database_transaction(query="""INSERT INTO users_passwords VALUES (%s, %s);""",
+                                         params=(username, password))
             user_with_password = {"username": username,
-                                  "password": self.password_generator()
+                                  "password": password
                                   }
             self.users_with_passwords.append(user_with_password)
             self.users.append(user)
