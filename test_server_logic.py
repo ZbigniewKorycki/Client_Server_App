@@ -38,7 +38,7 @@ class TestServerLogic(unittest.TestCase):
         self.assertFalse(self.server.check_if_username_exists(username="test_user123"))
 
     def test_add_delete_admin(self):
-        result_adding_admin = self.server.add_user(username="test_admin", privilege="admin")
+        result_adding_admin = self.server.add_user(username="test_admin", privileges="admin")
         self.assertIn("User added", result_adding_admin)
         result_if_admin = self.server.check_if_user_has_admin_privileges(username="test_admin")
         self.assertTrue(result_if_admin)
@@ -72,9 +72,9 @@ class TestServerLogic(unittest.TestCase):
         result_after_deletion = self.server.delete_user(username_to_delete="test_user123")
         self.assertIn("User deleted", result_after_deletion)
         self.assertFalse(self.server.check_if_username_exists(username="test_user123"))
-    #
+
     # def test_login_in(self):
-    #     self.server.add_user(username="user")
+    #     self.server.add_user(username="user_test_12")
     #     user_password = self.server.users_with_passwords[0]['password']
     #     incorrect_user_username = "test_user"
     #     incorrect_user_password = "test_password"
@@ -85,16 +85,21 @@ class TestServerLogic(unittest.TestCase):
     #     self.assertFalse(result_incorrect_user_correct_password)
     #     self.assertFalse(result_correct_user_incorrect_password)
     #
-    # def test_recognize_admin_privilege(self):
-    #     self.server.add_user(username="test_admin", privilege="admin")
-    #     self.server.add_user(username="test_admin_1", privilege="user")
-    #     self.server.add_user(username="test_admin_2", privilege="random_privilege")
-    #     result_admin_privilege = self.server.check_if_admin(self.server.get_user_if_exists("test_admin"))
-    #     result_user_privilege = self.server.check_if_admin(self.server.get_user_if_exists("test_admin_1"))
-    #     result_unknown_privilege = self.server.check_if_admin(self.server.get_user_if_exists("test_admin_2"))
-    #     self.assertTrue(result_admin_privilege)
-    #     self.assertFalse(result_user_privilege)
-    #     self.assertFalse(result_unknown_privilege)
+    def test_recognize_admin_privileges(self):
+        self.server.add_user(username="test_admin", privileges="admin")
+        self.server.add_user(username="test_admin_1", privileges="user")
+        self.server.add_user(username="test_admin_2", privileges="random_privileges")
+        result_if_admin_admin_privileges = self.server.check_if_user_has_admin_privileges("test_admin")
+        result_if_admin_user_privileges = self.server.check_if_user_has_admin_privileges("test_admin_1")
+        result_if_admin_unknown_privileges = self.server.check_if_user_has_admin_privileges("test_admin_2")
+        self.assertTrue(result_if_admin_admin_privileges)
+        self.assertFalse(result_if_admin_user_privileges)
+        self.assertFalse(result_if_admin_unknown_privileges)
+        self.server.change_user_privileges("test_admin", "user")
+        self.server.delete_user("test_admin")
+        self.server.delete_user("test_admin_1")
+        self.server.delete_user("test_admin_2")
+
     #
     # def test_send_message(self):
     #     self.server.add_user(username="user1")
@@ -114,12 +119,17 @@ class TestServerLogic(unittest.TestCase):
     #     result = self.server.get_user_if_exists(username="test_user")
     #     self.assertFalse(result)
     #
-    # def test_should_find_existed_user(self):
-    #     self.server.add_user(username="test_user")
-    #     user_obj = self.server.get_user_if_exists(username="test_user")
-    #     self.assertIsInstance(user_obj, User)
+    def test_should_find_existed_user(self):
+        self.server.add_user(username="test_user")
+        result_user = self.server.check_if_username_exists(username="test_user")
+        result_user_incorrect = self.server.check_if_username_exists(username="random_user")
+        self.assertTrue(result_user)
+        self.assertFalse(result_user_incorrect)
+        self.server.delete_user("test_user")
+
+
     #
-    # def test_recipient_inbox_user_privilege(self):
+    # def test_recipient_inbox_user_privileges(self):
     #     self.server.add_user("user1")
     #     self.server.add_user("user2")
     #     sender = self.server.get_user_if_exists(username="user1")
@@ -129,9 +139,9 @@ class TestServerLogic(unittest.TestCase):
     #     messages_in_recipient_inbox = recipient.unread_messages_in_inbox
     #     self.assertEqual(messages_in_recipient_inbox, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
     #
-    # def test_recipient_inbox_admin_privilege(self):
+    # def test_recipient_inbox_admin_privileges(self):
     #     self.server.add_user("user1")
-    #     self.server.add_user("user-admin", privilege="admin")
+    #     self.server.add_user("user-admin", privileges="admin")
     #     sender = self.server.get_user_if_exists(username="user1")
     #     recipient_admin = self.server.get_user_if_exists(username="user-admin")
     #     for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 2):
@@ -152,7 +162,7 @@ class TestServerLogic(unittest.TestCase):
     #     self.assertEqual(messages_in_recipient_inbox, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
     #
     # def test_send_message_to_all_users(self):
-    #     self.server.add_user("user-admin", privilege="admin")
+    #     self.server.add_user("user-admin", privileges="admin")
     #     for x in range(10):
     #         self.server.add_user(f"user{x}")
     #     sender = self.server.get_user_if_exists("user-admin")
@@ -162,7 +172,7 @@ class TestServerLogic(unittest.TestCase):
     #     self.assertIn("result", result[0])
     #
     # def test_send_message_to_all_users_over_255_characters(self):
-    #     self.server.add_user("user-admin", privilege="admin")
+    #     self.server.add_user("user-admin", privileges="admin")
     #     for x in range(10):
     #         self.server.add_user(f"user{x}")
     #     sender = self.server.get_user_if_exists("user-admin")
@@ -188,11 +198,12 @@ class TestServerLogic(unittest.TestCase):
     #     self.assertIn("sender", result)
     #     self.assertIn("status", result)
     #
-    # def test_show_user_base_interface(self):
-    #     self.server.add_user("user9")
-    #     inbox_info = self.server.user_base_interface("user9")
-    #     self.assertIn("0 unread messages", inbox_info)
-    #     self.assertTrue(self.server.check_if_username_exists("user9"))
+    def test_show_user_base_interface(self):
+        self.server.add_user("user9")
+        inbox_info = self.server.user_base_interface("user9")
+        self.assertIn("0 unread messages", inbox_info)
+        self.assertTrue(self.server.check_if_username_exists("user9"))
+        self.server.delete_user("user9")
 
 
 class TestCommandsDescription(unittest.TestCase):
