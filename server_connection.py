@@ -36,7 +36,7 @@ while run_server:
 
             if server.check_if_user_has_admin_privilege(username):
                 available_commands = ['send', 'send-to-all', 'inbox', 'add-user', 'help', 'info', 'uptime', 'logout',
-                                      'stop', 'add-server-version', 'delete-user']
+                                      'stop', 'add-server-version', 'delete-user','change-privileges']
             else:
                 available_commands = ['send', 'inbox', 'logout']
             output = json.dumps(available_commands, indent=4)
@@ -94,6 +94,13 @@ while run_server:
                 elif command == 'delete-user' and server.check_if_user_has_admin_privilege(username):
                     username_to_delete = client_socket.recv(server.buffer).decode("utf8")
                     output = json.dumps(server.delete_user(username_to_delete), indent=4)
+                    msg = output.encode("utf8")
+                    client_socket.send(msg)
+
+                elif command == 'change-privileges' and server.check_if_user_has_admin_privilege(username):
+                    username_to_change_privilege = client_socket.recv(server.buffer).decode("utf8")
+                    new_privilege = client_socket.recv(server.buffer).decode("utf8")
+                    output = json.dumps(server.change_user_privileges(username_to_change_privilege, new_privilege), indent=4)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 

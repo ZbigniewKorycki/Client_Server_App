@@ -64,7 +64,7 @@ class Server:
     def add_user(self, username, privilege="user"):
         if self.check_if_username_exists(username):
             error_message_user_duplicate = {
-                "User duplicate": "The user with this name exists already, choose another username."
+                "User duplicate": f"The user '{username}'with this name exists already, choose another username."
             }
             return error_message_user_duplicate
         elif username == "":
@@ -99,12 +99,12 @@ class Server:
     def delete_user(self, username_to_delete):
         if not self.check_if_username_exists(username_to_delete):
             error_message_user_doesnt_exists = {
-                "User doesn't exists": "The user with this username doesn't exists."
+                "User doesn't exists": f"The user '{username_to_delete}' doesn't exists."
             }
             return error_message_user_doesnt_exists
         elif self.check_if_user_has_admin_privilege(username_to_delete):
             error_message_cant_delete_admin = {
-                "User with admin privileges": "The user you want to delete has admin privileges, you can't delete him."
+                "User with admin privileges": f"The user '{username_to_delete}' has admin privileges, you can't delete him."
             }
             return error_message_cant_delete_admin
         else:
@@ -119,7 +119,6 @@ class Server:
                 params=(username_to_delete,))
             success_message_user_deleted = {"User deleted": f"All '{username_to_delete}' user data has been deleted."}
             return success_message_user_deleted
-
 
     def password_generator(self):
         characters = string.ascii_letters + string.digits + string.punctuation
@@ -236,6 +235,24 @@ class Server:
             return True
         else:
             return False
+
+    def change_user_privileges(self, username, new_privileges):
+        if not self.check_if_username_exists(username):
+            error_message_user_doesnt_exists = {
+                "User doesn't exists": f"The user '{username}' doesn't exists."
+            }
+            return error_message_user_doesnt_exists
+        elif new_privileges not in ['admin', 'user']:
+            error_message_incorrect_privileges = {
+                "Incorrect privileges": f"Given privileges '{new_privileges}' are not valid."
+            }
+            return error_message_incorrect_privileges
+        else:
+            self.db.database_transaction(query="""UPDATE users_privileges SET privilege = %s WHERE username = %s;""",
+                                         params=(new_privileges, username,))
+            message_privileges_changed = {"Privileges changed":
+                                              f"The user '{username}' now has an {new_privileges} privileges."}
+            return message_privileges_changed
 
     def count_unread_messages_in_user_inbox(self, username):
         result = self.db.database_transaction(

@@ -69,6 +69,14 @@ while run_client:
                     client_socket.send(server_version_number)
                     print(client_socket.recv(client.buffer).decode("utf8"))
 
+                elif command.decode("utf8") == 'change-privileges' and command.decode("utf8") in available_commands_list:
+                    client_socket.send(command)
+                    username_to_change_privilege = verify_input('To which user you want to change privileges: ')
+                    client_socket.send(username_to_change_privilege)
+                    new_privileges = verify_input('Input new privileges: ')
+                    client_socket.send(new_privileges)
+                    print(client_socket.recv(client.buffer).decode("utf8"))
+
                 elif command.decode("utf8") == 'logout' and command.decode("utf8") in available_commands_list:
                     client_socket.send(command)
                     print(client_socket.recv(client.buffer).decode("utf8"))
