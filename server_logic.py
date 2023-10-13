@@ -41,9 +41,17 @@ class Server:
         return versions
 
     def add_server_version(self, version_num):
-        self.db.database_transaction(
-            query="""INSERT INTO server_versions VALUES (%s, %s) ON CONFLICT (version) DO NOTHING;""",
-            params=(version_num, str(datetime.now().strftime("%d/%m/%Y, %H:%M"))))
+        version_num_occurrence = self.db.database_transaction(
+            query="""SELECT COUNT(*) FROM server_versions WHERE version = %s;""",
+            params=(version_num,))
+        if version_num_occurrence[0][0] == 0:
+            self.db.database_transaction(
+                query="""INSERT INTO server_versions VALUES (%s, %s);""",
+                params=(version_num, str(datetime.now().strftime("%d/%m/%Y, %H:%M"))))
+            message = {f"Success": f"New server version: {version_num}, has been added."}
+        else:
+            message = {f"Duplicate": f"Server version: {version_num}, already exists."}
+        return message
 
     def get_server_uptime(self):
         current_time = datetime.now()
@@ -133,7 +141,7 @@ class Server:
                         sender_username,
                         recipient_username,
                         message,
-                        datetime.now().strftime("%m/%d/%Y, %H:%M")))
+                        datetime.now().strftime("%d/%m/%Y, %H:%M")))
                     success_message_sent = {
                         "Message sent": "The message has been successfully sent."
                     }
@@ -162,7 +170,7 @@ class Server:
                             sender_username,
                             recipient_username,
                             message,
-                            datetime.now().strftime("%m/%d/%Y, %H:%M")))
+                            datetime.now().strftime("%d/%m/%Y, %H:%M")))
                         result = {"recipient": recipient_username, "result": "Message successfully sent."}
                     else:
                         result = {"recipient": recipient_username, "result": "Not sent. Inbox limit reached."}

@@ -36,7 +36,7 @@ while run_server:
 
             if server.check_if_user_has_admin_privilege(username):
                 available_commands = ['send', 'send-to-all', 'inbox', 'add-user', 'help', 'info', 'uptime', 'logout',
-                                      'stop']
+                                      'stop', 'add-server-version']
             else:
                 available_commands = ['send', 'inbox', 'logout']
             output = json.dumps(available_commands, indent=4)
@@ -95,6 +95,12 @@ while run_server:
                     server_socket.close()
                     run_server = False
                     break
+
+                elif command == 'add-server-version' and server.check_if_user_has_admin_privilege(username):
+                    server_version_number = client_socket.recv(server.buffer).decode("utf8")
+                    output = json.dumps(server.add_server_version(server_version_number), indent=4)
+                    msg = output.encode("utf8")
+                    client_socket.send(msg)
 
                 else:
                     message = "Incorrect command or you don't have permission to use it."

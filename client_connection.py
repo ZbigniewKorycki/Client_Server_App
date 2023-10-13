@@ -57,6 +57,12 @@ while run_client:
                     client_socket.send(username)
                     print(client_socket.recv(client.buffer).decode("utf8"))
 
+                elif command.decode("utf8") == 'add-server-version' and command.decode("utf8") in available_commands_list:
+                    client_socket.send(command)
+                    server_version_number = verify_input('New server version: ')
+                    client_socket.send(server_version_number)
+                    print(client_socket.recv(client.buffer).decode("utf8"))
+
                 elif command.decode("utf8") == 'logout' and command.decode("utf8") in available_commands_list:
                     client_socket.send(command)
                     print(client_socket.recv(client.buffer).decode("utf8"))
