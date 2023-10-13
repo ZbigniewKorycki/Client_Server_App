@@ -11,7 +11,6 @@ class Server:
         self.host = host
         self.port = port
         self.buffer = buffer
-        self.creation_time = datetime.now()
         self.db = PostgresSQLConnection()
         self.create_db_tables()
         self.add_server_version(start_version)
@@ -39,17 +38,19 @@ class Server:
 
     def get_server_versions(self):
         versions = self.db.database_transaction(query="""SELECT * FROM server_versions;""")
-        print(versions)
         return versions
 
     def add_server_version(self, version_num):
         self.db.database_transaction(
             query="""INSERT INTO server_versions VALUES (%s, %s) ON CONFLICT (version) DO NOTHING;""",
-            params=(version_num, str(datetime.now().strftime("%m/%d/%Y, %H:%M"))))
+            params=(version_num, str(datetime.now().strftime("%d/%m/%Y, %H:%M"))))
 
     def get_server_uptime(self):
         current_time = datetime.now()
-        server_uptime = current_time - self.creation_time
+        server_time = self.db.database_transaction(
+            query="""SELECT version_date FROM server_versions ORDER BY version_date DESC;""")
+        server_time_datetime = datetime.strptime(str(server_time[0][0]), '%Y-%m-%d %H:%M:%S')
+        server_uptime = current_time - server_time_datetime
         return server_uptime
 
     def add_user(self, username, privilege="user"):

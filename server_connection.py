@@ -22,7 +22,7 @@ while run_server:
         if server.login_into_system(username, password):
             logged_user, inbox_info = server.user_base_interface(username)
 
-            output = json.dumps("Correct_login_and_password", indent=4)
+            output = json.dumps("Correct_login_and_password", indent=4, default=str)
             msg = output.encode("utf8")
             client_socket.send(msg)
 
@@ -30,7 +30,7 @@ while run_server:
                 "logged_user": logged_user,
                 "inbox_info": inbox_info,
             }
-            output = json.dumps(info_after_login, indent=4)
+            output = json.dumps(info_after_login, indent=4, default=str)
             msg = output.encode("utf8")
             client_socket.send(msg)
 
@@ -60,7 +60,7 @@ while run_server:
                 elif command == 'send':
                     recipient = client_socket.recv(server.buffer).decode("utf8")
                     message = client_socket.recv(server.buffer).decode("utf8")
-                    output = json.dumps(server.send_message(username, recipient, message), indent=4)
+                    output = json.dumps(server.send_message(username, recipient, message), indent=4, default=str)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
@@ -75,13 +75,13 @@ while run_server:
                     client_socket.send(msg)
 
                 elif command == 'uptime' and server.check_if_user_has_admin_privilege(username):
-                    output = json.dumps({"server_uptime": str(server.get_server_uptime())}, indent=4)
+                    output = json.dumps({"server_uptime": str(server.get_server_uptime())}, indent=4, default=str)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
                 elif command == 'send-to-all' and server.check_if_user_has_admin_privilege(username):
                     message = client_socket.recv(server.buffer).decode("utf8")
-                    output = json.dumps(server.send_message_to_all(username, message), indent=4)
+                    output = json.dumps(server.send_message_to_all(username, message), indent=4, default=str)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
