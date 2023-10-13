@@ -90,7 +90,6 @@ class Server:
                                          params=(username, password))
             self.db.database_transaction(query="""INSERT INTO users_privileges VALUES (%s, %s);""",
                                          params=(username, privilege))
-
             print(password)
             success_message = {
                 "User added": f"'{username}' has been successfully added do database."
@@ -122,8 +121,8 @@ class Server:
             return False
 
     def user_base_interface(self, username):
-        inbox_info = f"In your inbox you have: xxxxxxxxxx unread messages."
-        return username, inbox_info
+        inbox_info = f"In your inbox you have: {self.count_unread_messages_in_username_inbox(username)} unread messages."
+        return inbox_info
 
     def send_message(self, sender_username, recipient_username, message):
         if not self.check_if_username_exists(recipient_username):

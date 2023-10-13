@@ -20,14 +20,14 @@ while run_server:
         username = client_socket.recv(server.buffer).decode("utf8")
         password = client_socket.recv(server.buffer).decode("utf8")
         if server.login_into_system(username, password):
-            logged_user, inbox_info = server.user_base_interface(username)
+            inbox_info = server.user_base_interface(username)
 
             output = json.dumps("Correct_login_and_password", indent=4, default=str)
             msg = output.encode("utf8")
             client_socket.send(msg)
 
             info_after_login = {
-                "logged_user": logged_user,
+                "logged_user": username,
                 "inbox_info": inbox_info,
             }
             output = json.dumps(info_after_login, indent=4, default=str)
