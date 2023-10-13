@@ -27,11 +27,15 @@ class TestServerLogic(unittest.TestCase):
     #     self.assertIsInstance(password, str)
     #     self.assertGreaterEqual(password_len_various_symbols, 8)
     #
-    # def test_add_user(self):
-    #     result = self.server.add_user(username="test_user")
-    #     result_if_admin = self.server.check_if_user_has_admin_privilege("test_user")
-    #     self.assertIn("User added", result)
-    #     self.assertFalse(result_if_admin)
+
+    def test_add_delete_user(self):
+        result_adding = self.server.add_user(username="test_user_123")
+        result_if_admin = self.server.check_if_user_has_admin_privilege("test_user")
+        self.assertIn("User added", result_adding)
+        self.assertFalse(result_if_admin)
+        result_after_deletion = self.server.delete_user(username_to_delete="test_user_123")
+        self.assertIn("User deleted", result_after_deletion)
+        self.assertFalse(self.server.check_if_username_exists(username="test_user123"))
     #
     # def test_add_admin(self):
     #     result = self.server.add_user(username="test_user", privilege="admin")
@@ -54,11 +58,14 @@ class TestServerLogic(unittest.TestCase):
         result1 = self.server.add_user(username="testuser      ")
         self.assertIn("No space in username allowed", result)
         self.assertIn("No space in username allowed", result1)
-    #
-    # def test_dont_add_user_with_existed_username(self):
-    #     self.server.add_user(username="test_user")
-    #     result = self.server.add_user(username="test_user")
-    #     self.assertIn("User duplicate", result)
+
+    def test_dont_add_user_with_existed_username(self):
+        self.server.add_user(username="test_user123")
+        result_after_adding_duplicate = self.server.add_user(username="test_user123")
+        self.assertIn("User duplicate", result_after_adding_duplicate)
+        result_after_deletion = self.server.delete_user(username_to_delete="test_user123")
+        self.assertIn("User deleted", result_after_deletion)
+        self.assertFalse(self.server.check_if_username_exists(username="test_user123"))
     #
     # def test_login_in(self):
     #     self.server.add_user(username="user")
