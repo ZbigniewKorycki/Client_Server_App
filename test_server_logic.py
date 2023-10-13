@@ -39,21 +39,21 @@ class TestServerLogic(unittest.TestCase):
     #     self.assertIn("User added", result)
     #     self.assertTrue(result_if_admin)
 
-    # def test_dont_add_username_starts_with_no_alpha_symbol(self):
-    #     result = self.server.add_user(username="1abc")
-    #     result1 = self.server.add_user(username="132455465")
-    #     self.assertIn("Incorrect username", result)
-    #     self.assertIn("Incorrect username", result1)
-    # #
-    # def test_dont_add_empty_username(self):
-    #     result = self.server.add_user(username="")
-    #     self.assertIn("Empty username", result)
-    #
-    # def test_dont_add_username_with_space(self):
-    #     result = self.server.add_user(username="test   user")
-    #     result1 = self.server.add_user(username="testuser      ")
-    #     self.assertIn("No space in username allowed", result)
-    #     self.assertIn("No space in username allowed", result1)
+    def test_dont_add_username_starts_with_no_alpha_symbol(self):
+        result = self.server.add_user(username="1abc")
+        result1 = self.server.add_user(username="132455465")
+        self.assertIn("Incorrect username", result)
+        self.assertIn("Incorrect username", result1)
+
+    def test_dont_add_empty_username(self):
+        result = self.server.add_user(username="")
+        self.assertIn("Empty username", result)
+
+    def test_dont_add_username_with_space(self):
+        result = self.server.add_user(username="test   user")
+        result1 = self.server.add_user(username="testuser      ")
+        self.assertIn("No space in username allowed", result)
+        self.assertIn("No space in username allowed", result1)
     #
     # def test_dont_add_user_with_existed_username(self):
     #     self.server.add_user(username="test_user")
