@@ -77,8 +77,8 @@ while run_client:
 
                 elif command.decode("utf8") == 'change-privileges' and command.decode("utf8") in available_commands_list:
                     client_socket.send(command)
-                    username_to_change_privilege = verify_input('To which user you want to change privileges: ')
-                    client_socket.send(username_to_change_privilege)
+                    username_to_change_privileges = verify_input('To which user you want to change privileges: ')
+                    client_socket.send(username_to_change_privileges)
                     new_privileges = verify_input('Input new privileges: ')
                     client_socket.send(new_privileges)
                     print(client_socket.recv(client.buffer).decode("utf8"))

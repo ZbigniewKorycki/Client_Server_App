@@ -99,8 +99,8 @@ while run_server:
 
                 elif command == 'change-privileges' and server.check_if_user_has_admin_privileges(username):
                     username_to_change_privilege = client_socket.recv(server.buffer).decode("utf8")
-                    new_privilege = client_socket.recv(server.buffer).decode("utf8")
-                    output = json.dumps(server.change_user_privileges(username_to_change_privilege, new_privilege), indent=4)
+                    new_privileges = client_socket.recv(server.buffer).decode("utf8")
+                    output = json.dumps(server.change_user_privileges(username_to_change_privilege, new_privilegenew_privileges), indent=4)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
@@ -135,7 +135,7 @@ while run_server:
 
     elif command == 'add-admin':
         admin_name = client_socket.recv(server.buffer).decode("utf8")
-        output = json.dumps(server.add_user(admin_name, privilege="admin"), indent=4)
+        output = json.dumps(server.add_user(admin_name, privileges="admin"), indent=4)
         msg = output.encode("utf8")
         client_socket.send(msg)
 

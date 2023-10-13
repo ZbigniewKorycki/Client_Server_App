@@ -21,7 +21,7 @@ class Server:
                                                                         version_date TIMESTAMP);""")
         self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_privileges (
                                                                         username VARCHAR PRIMARY KEY,
-                                                                        privilege VARCHAR NOT NULL DEFAULT user
+                                                                        privileges VARCHAR NOT NULL DEFAULT user
                                                                         );""")
         self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_passwords (
                                                                         username VARCHAR PRIMARY KEY,
@@ -72,7 +72,7 @@ class Server:
         server_uptime = current_time - server_time_datetime
         return server_uptime
 
-    def add_user(self, username, privilege="user"):
+    def add_user(self, username, privileges="user"):
         if self.check_if_username_exists(username):
             error_message_user_duplicate = {
                 "User duplicate": f"The user '{username}' with this name exists already, choose another username."
@@ -94,13 +94,13 @@ class Server:
             }
             return error_message_have_space
         else:
-            if privilege != "admin":
-                privilege = "user"
+            if privileges != "admin":
+                privileges = "user"
             password = self.password_generator()
             self.db.database_transaction(query="""INSERT INTO users_passwords VALUES (%s, %s);""",
                                          params=(username, password))
             self.db.database_transaction(query="""INSERT INTO users_privileges VALUES (%s, %s);""",
-                                         params=(username, privilege))
+                                         params=(username, privileges))
             print(password)
             success_message = {
                 "User added": f"'{username}' has been successfully added do database."
@@ -239,9 +239,9 @@ class Server:
 
     def check_if_user_has_admin_privileges(self, username):
         result = self.db.database_transaction(
-            query="""SELECT COUNT(*) FROM users_privileges WHERE username = %s AND privilege = %s;""",
+            query="""SELECT COUNT(*) FROM users_privileges WHERE username = %s AND privileges = %s;""",
             params=(username, "admin"))
-        # output from result in format [(1,)] if user has admin privileges or [(0,)] if only user privilege
+        # output from result in format [(1,)] if user has admin privileges or [(0,)] if only user privileges
         if result[0][0]:
             return True
         else:
@@ -259,7 +259,7 @@ class Server:
             }
             return error_message_incorrect_privileges
         else:
-            self.db.database_transaction(query="""UPDATE users_privileges SET privilege = %s WHERE username = %s;""",
+            self.db.database_transaction(query="""UPDATE users_privileges SET privileges = %s WHERE username = %s;""",
                                          params=(new_privileges, username,))
             message_privileges_changed = {"Privileges changed":
                                               f"The user '{username}' now has an {new_privileges} privileges."}
