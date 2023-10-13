@@ -57,6 +57,12 @@ while run_client:
                     client_socket.send(username)
                     print(client_socket.recv(client.buffer).decode("utf8"))
 
+                elif command.decode("utf8") == 'delete-user' and command.decode("utf8") in available_commands_list:
+                    client_socket.send(command)
+                    username_to_delete = verify_input('Input username you want to delete: ')
+                    client_socket.send(username_to_delete)
+                    print(client_socket.recv(client.buffer).decode("utf8"))
+
                 elif command.decode("utf8") == 'add-server-version' and command.decode("utf8") in available_commands_list:
                     client_socket.send(command)
                     server_version_number = verify_input('New server version: ')

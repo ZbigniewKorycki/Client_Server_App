@@ -2,6 +2,7 @@ commands_description = {
     "add-admin": "add admin to the database",
     "add-server-version": "add new version of the server",
     "add-user": "add user to the database",
+    "delete-user": "delete user from database, can't delete user with admin privileges",
     "help": "returns the list of available commands with a short description",
     "inbox": "open inbox with all received messages",
     "info": "returns the server version number and date of creation",

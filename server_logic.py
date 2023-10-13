@@ -96,6 +96,31 @@ class Server:
             }
             return success_message
 
+    def delete_user(self, username_to_delete):
+        if not self.check_if_username_exists(username_to_delete):
+            error_message_user_doesnt_exists = {
+                "User doesn't exists": "The user with this username doesn't exists."
+            }
+            return error_message_user_doesnt_exists
+        elif self.check_if_user_has_admin_privilege(username_to_delete):
+            error_message_cant_delete_admin = {
+                "User with admin privileges": "The user you want to delete has admin privileges, you can't delete him."
+            }
+            return error_message_cant_delete_admin
+        else:
+            self.db.database_transaction(
+                query="""DELETE FROM users_privileges WHERE username = %s;""",
+                params=(username_to_delete,))
+            self.db.database_transaction(
+                query="""DELETE FROM users_passwords WHERE username = %s;""",
+                params=(username_to_delete,))
+            self.db.database_transaction(
+                query="""DELETE FROM users_messages WHERE sender_username = %s;""",
+                params=(username_to_delete,))
+            success_message_user_deleted = {"User deleted": f"All '{username_to_delete}' user data has been deleted."}
+            return success_message_user_deleted
+
+
     def password_generator(self):
         characters = string.ascii_letters + string.digits + string.punctuation
         password = ''.join(random.choice(characters) for _ in range(12))
@@ -199,6 +224,7 @@ class Server:
             query="""SELECT sender_username, message_content,sending_date
              FROM users_messages WHERE recipient_username = %s ORDER BY sending_date DESC;""",
             params=(username,))
+
         return messages
 
     def check_if_user_has_admin_privilege(self, username):
