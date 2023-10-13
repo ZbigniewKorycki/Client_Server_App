@@ -19,14 +19,14 @@ class TestServerLogic(unittest.TestCase):
     #         self.assertIn("version", version)
     #         self.assertIn("version_date", version)
     #
-    # def test_generated_password(self):
-    #     password = self.server.password_generator()
-    #     password_len = len(password)
-    #     password_len_various_symbols = len(set(password))
-    #     self.assertEqual(password_len, 12)
-    #     self.assertIsInstance(password, str)
-    #     self.assertGreaterEqual(password_len_various_symbols, 8)
-    #
+    def test_generated_password(self):
+        password = self.server.password_generator()
+        password_len = len(password)
+        password_len_various_symbols = len(set(password))
+        self.assertEqual(password_len, 12)
+        self.assertIsInstance(password, str)
+        self.assertGreaterEqual(password_len_various_symbols, 8)
+
 
     def test_add_delete_user(self):
         result_adding = self.server.add_user(username="test_user_123")
