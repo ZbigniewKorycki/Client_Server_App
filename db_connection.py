@@ -56,15 +56,6 @@ class PostgresSQLConnection:
         finally:
             self.close_connection_with_db()
 
-    def get_column_names(self, cursor):
-        try:
-            columns = [column[0] for column in cursor.description]
-        except TypeError:
-            return False
-        else:
-            return columns
-
-
 
 
 

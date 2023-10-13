@@ -17,16 +17,16 @@ class Server:
 
     def create_db_tables(self):
         self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS server_versions (
-                                                    version VARCHAR(20) PRIMARY KEY,
-                                                    version_date TIMESTAMP);""")
+                                                                        version VARCHAR(20) PRIMARY KEY,
+                                                                        version_date TIMESTAMP);""")
         self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_privileges (
-                                                                                    username VARCHAR PRIMARY KEY,
-                                                                                    privilege VARCHAR NOT NULL DEFAULT user
-                                                                                    );""")
+                                                                        username VARCHAR PRIMARY KEY,
+                                                                        privilege VARCHAR NOT NULL DEFAULT user
+                                                                        );""")
         self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_passwords (
-                                                                                    username VARCHAR PRIMARY KEY,
-                                                                                    password VARCHAR NOT NULL
-                                                                                    );""")
+                                                                        username VARCHAR PRIMARY KEY,
+                                                                        password VARCHAR NOT NULL
+                                                                        );""")
         self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_messages (
                                                                         message_id SERIAL PRIMARY KEY,
                                                                         sender_username VARCHAR NOT NULL,
@@ -98,7 +98,7 @@ class Server:
 
     def password_generator(self):
         characters = string.ascii_letters + string.digits + string.punctuation
-        password = ''.join(random.choice(characters) for i in range(12))
+        password = ''.join(random.choice(characters) for _ in range(12))
         return password
 
     def login_into_system(self, username, password):
@@ -121,7 +121,7 @@ class Server:
             return False
 
     def user_base_interface(self, username):
-        inbox_info = f"In your inbox you have: {self.count_unread_messages_in_username_inbox(username)} unread messages."
+        inbox_info = f"In your inbox you have: {self.count_unread_messages_in_user_inbox(username)} unread messages."
         return inbox_info
 
     def send_message(self, sender_username, recipient_username, message):
@@ -132,15 +132,19 @@ class Server:
             return error_message_no_recipient
         else:
             if len(message) <= 255:
-                if (self.count_unread_messages_in_username_inbox(
+                if (self.count_unread_messages_in_user_inbox(
                         recipient_username) < INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
                         self.check_if_user_has_admin_privilege(recipient_username)):
-                    self.db.database_transaction(query="""INSERT INTO users_messages(sender_username, recipient_username, message_content, sending_date)
-                                    VALUES (%s, %s, %s, %s);""", params=(
-                        sender_username,
-                        recipient_username,
-                        message,
-                        datetime.now().strftime("%d/%m/%Y, %H:%M")))
+                    self.db.database_transaction(
+                        query="""INSERT INTO users_messages(sender_username,
+                                    recipient_username,
+                                    message_content,
+                                    sending_date)
+                                    VALUES (%s, %s, %s, %s);""",
+                        params=(sender_username,
+                                recipient_username,
+                                message,
+                                datetime.now().strftime("%d/%m/%Y, %H:%M")))
                     success_message_sent = {
                         "Message sent": "The message has been successfully sent."
                     }
@@ -161,15 +165,19 @@ class Server:
         if len(message) <= 255:
             for recipient_username in self.get_all_users_list():
                 if recipient_username != sender_username:
-                    if (self.count_unread_messages_in_username_inbox(
+                    if (self.count_unread_messages_in_user_inbox(
                             recipient_username) < INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
                             self.check_if_user_has_admin_privilege(recipient_username)):
-                        self.db.database_transaction(query="""INSERT INTO users_messages(sender_username, recipient_username, message_content, sending_date)
-                                                            VALUES (%s, %s, %s, %s);""", params=(
-                            sender_username,
-                            recipient_username,
-                            message,
-                            datetime.now().strftime("%d/%m/%Y, %H:%M")))
+                        self.db.database_transaction(
+                            query="""INSERT INTO users_messages(sender_username,
+                                                                recipient_username,
+                                                                message_content,
+                                                                sending_date)
+                                                                VALUES (%s, %s, %s, %s);""",
+                            params=(sender_username,
+                                    recipient_username,
+                                    message,
+                                    datetime.now().strftime("%d/%m/%Y, %H:%M")))
                         result = {"recipient": recipient_username, "result": "Message successfully sent."}
                     else:
                         result = {"recipient": recipient_username, "result": "Not sent. Inbox limit reached."}
@@ -197,13 +205,13 @@ class Server:
         result = self.db.database_transaction(
             query="""SELECT COUNT(*) FROM users_privileges WHERE username = %s AND privilege = %s;""",
             params=(username, "admin"))
-        # output from result in format [(1,)] if user has admin privileges or [(0,)] if don't
+        # output from result in format [(1,)] if user has admin privileges or [(0,)] if only user privilege
         if result[0][0]:
             return True
         else:
             return False
 
-    def count_unread_messages_in_username_inbox(self, username):
+    def count_unread_messages_in_user_inbox(self, username):
         result = self.db.database_transaction(
             query="""SELECT COUNT(*) FROM users_messages WHERE recipient_username = %s AND read_by_recipient = %s;""",
             params=(username, False))
@@ -217,3 +225,14 @@ class Server:
             query="""SELECT username FROM users_privileges;""")
         users_list = [user[0] for user in result]
         return users_list
+
+    def get_table_column_names(self, table_name):
+        result = self.db.database_transaction(
+            query="""SELECT column_name
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public' AND table_name = %s;""",
+            params=(table_name,))
+        # output from result in format [('column_name1',), ('column_name2',)]
+        column_names = [column[0] for column in result]
+
+        print(column_names)
