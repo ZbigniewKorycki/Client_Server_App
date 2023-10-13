@@ -11,14 +11,15 @@ class TestServerLogic(unittest.TestCase):
     def test_server_uptime(self):
         result = self.server.get_server_uptime()
         self.assertIsInstance(result, datetime.timedelta)
-    #
-    # def test_add_server_version(self):
-    #     self.server.add_server_version("1.2.6")
-    #     for version in self.server.versions[-1:0]:
-    #         self.assertEqual(version["version"],"1.2.8")
-    #         self.assertIn("version", version)
-    #         self.assertIn("version_date", version)
-    #
+
+    def test_add_delete_server_version(self):
+        self.server.add_server_version("1.2.6")
+        result_all_versions_after_adding = [version[0] for version in self.server.get_server_versions()]
+        self.assertIn("1.2.6", result_all_versions_after_adding)
+        self.server.delete_server_version("1.2.6")
+        result_all_versions_after_deletion = [version[0] for version in self.server.get_server_versions()]
+        self.assertNotIn("1.2.6", result_all_versions_after_deletion)
+
     def test_generated_password(self):
         password = self.server.password_generator()
         password_len = len(password)
@@ -27,21 +28,26 @@ class TestServerLogic(unittest.TestCase):
         self.assertIsInstance(password, str)
         self.assertGreaterEqual(password_len_various_symbols, 8)
 
-
     def test_add_delete_user(self):
         result_adding = self.server.add_user(username="test_user_123")
-        result_if_admin = self.server.check_if_user_has_admin_privilege("test_user")
+        result_if_admin = self.server.check_if_user_has_admin_privileges("test_user_123")
         self.assertIn("User added", result_adding)
         self.assertFalse(result_if_admin)
         result_after_deletion = self.server.delete_user(username_to_delete="test_user_123")
         self.assertIn("User deleted", result_after_deletion)
         self.assertFalse(self.server.check_if_username_exists(username="test_user123"))
-    #
-    # def test_add_admin(self):
-    #     result = self.server.add_user(username="test_user", privilege="admin")
-    #     result_if_admin = self.server.check_if_admin(self.server.get_user_if_exists("test_user"))
-    #     self.assertIn("User added", result)
-    #     self.assertTrue(result_if_admin)
+
+    def test_add_delete_admin(self):
+        result_adding_admin = self.server.add_user(username="test_admin", privilege="admin")
+        self.assertIn("User added", result_adding_admin)
+        result_if_admin = self.server.check_if_user_has_admin_privileges(username="test_admin")
+        self.assertTrue(result_if_admin)
+        result_change_privileges_to_user = self.server.change_user_privileges("test_admin", "user")
+        self.assertIn("Privileges changed", result_change_privileges_to_user)
+        result_if_admin_after_change = self.server.check_if_user_has_admin_privileges(username="test_admin")
+        self.assertFalse(result_if_admin_after_change)
+        result_delete_user = self.server.delete_user("test_admin")
+        self.assertIn("User deleted", result_delete_user)
 
     def test_dont_add_username_starts_with_no_alpha_symbol(self):
         result = self.server.add_user(username="1abc")
@@ -205,6 +211,8 @@ class TestCommandsDescription(unittest.TestCase):
         self.assertIn("uptime", result)
         self.assertIn("add-server-version", result)
         self.assertIn("delete-user", result)
+        self.assertIn("change-privileges", result)
+
 
 
 if __name__ == '__main__':
