@@ -3,6 +3,7 @@ from server_logic import Server
 import datetime
 import commands
 
+
 class TestServerLogic(unittest.TestCase):
 
     def setUp(self):
@@ -115,10 +116,7 @@ class TestServerLogic(unittest.TestCase):
     #     self.assertIn("Message sent", result_success)
     #     self.assertIn("Character limit reached", result_over_255)
     #
-    # def test_should_not_find_non_existed_user(self):
-    #     result = self.server.get_user_if_exists(username="test_user")
-    #     self.assertFalse(result)
-    #
+
     def test_should_find_existed_user(self):
         self.server.add_user(username="test_user")
         result_user = self.server.check_if_username_exists(username="test_user")
@@ -126,7 +124,6 @@ class TestServerLogic(unittest.TestCase):
         self.assertTrue(result_user)
         self.assertFalse(result_user_incorrect)
         self.server.delete_user("test_user")
-
 
     #
     # def test_recipient_inbox_user_privileges(self):
@@ -161,25 +158,31 @@ class TestServerLogic(unittest.TestCase):
     #     self.assertIn("Inbox limit", result_message_over_limit)
     #     self.assertEqual(messages_in_recipient_inbox, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
     #
-    # def test_send_message_to_all_users(self):
-    #     self.server.add_user("user-admin", privileges="admin")
-    #     for x in range(10):
-    #         self.server.add_user(f"user{x}")
-    #     sender = self.server.get_user_if_exists("user-admin")
-    #     result = self.server.send_message_to_all(sender, "test message")
-    #     self.assertEqual(len(result), 10)
-    #     self.assertIn("recipient", result[0])
-    #     self.assertIn("result", result[0])
-    #
-    # def test_send_message_to_all_users_over_255_characters(self):
-    #     self.server.add_user("user-admin", privileges="admin")
-    #     for x in range(10):
-    #         self.server.add_user(f"user{x}")
-    #     sender = self.server.get_user_if_exists("user-admin")
-    #     result = self.server.send_message_to_all(sender, "M" * 256)
-    #     self.assertIn("Character limit reached", result)
-    #
-    #
+
+    def test_send_message_to_all_users(self):
+        self.server.add_user("user-admin", privileges="admin")
+        for x in range(5):
+            self.server.add_user(f"user{x}")
+        result = self.server.send_message_to_all("user-admin", "test message")
+        self.assertEqual(len(result), 5)
+        self.assertIn("recipient", result[0])
+        self.assertIn("result", result[0])
+        for x in range(5):
+            self.server.delete_user(f"user{x}")
+        self.server.change_user_privileges("user-admin", "user")
+        self.server.delete_user("user-admin")
+
+    def test_send_message_to_all_users_over_255_characters(self):
+        self.server.add_user("user-admin", privileges="admin")
+        for x in range(5):
+            self.server.add_user(f"user{x}")
+        result = self.server.send_message_to_all(sender_username="user-admin", message="M" * 256)
+        self.assertIn("Character limit reached", result)
+        for x in range(5):
+            self.server.delete_user(f"user{x}")
+        self.server.change_user_privileges("user-admin", "user")
+        self.server.delete_user("user-admin")
+
     # def test_should_empty_inbox_returned(self):
     #     self.server.add_user("user1")
     #     user = self.server.get_user_if_exists(username="user1")
@@ -197,7 +200,7 @@ class TestServerLogic(unittest.TestCase):
     #     self.assertIn("recipient", result)
     #     self.assertIn("sender", result)
     #     self.assertIn("status", result)
-    #
+
     def test_show_user_base_interface(self):
         self.server.add_user("user9")
         inbox_info = self.server.user_base_interface("user9")
@@ -223,7 +226,6 @@ class TestCommandsDescription(unittest.TestCase):
         self.assertIn("add-server-version", result)
         self.assertIn("delete-user", result)
         self.assertIn("change-privileges", result)
-
 
 
 if __name__ == '__main__':
