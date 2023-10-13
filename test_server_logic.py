@@ -8,9 +8,9 @@ class TestServerLogic(unittest.TestCase):
     def setUp(self):
         self.server = Server('192.168.0.163', 61033, 1024)
 
-    # def test_server_uptime(self):
-    #     result = self.server.get_server_uptime()
-    #     self.assertIsInstance(result, datetime.timedelta)
+    def test_server_uptime(self):
+        result = self.server.get_server_uptime()
+        self.assertIsInstance(result, datetime.timedelta)
     #
     # def test_add_server_version(self):
     #     self.server.add_server_version("1.2.6")
