@@ -75,7 +75,7 @@ class Server:
     def add_user(self, username, privilege="user"):
         if self.check_if_username_exists(username):
             error_message_user_duplicate = {
-                "User duplicate": f"The user '{username}'with this name exists already, choose another username."
+                "User duplicate": f"The user '{username}' with this name exists already, choose another username."
             }
             return error_message_user_duplicate
         elif username == "":
@@ -288,5 +288,4 @@ class Server:
             params=(table_name,))
         # output from result in format [('column_name1',), ('column_name2',)]
         column_names = [column[0] for column in result]
-
         print(column_names)
