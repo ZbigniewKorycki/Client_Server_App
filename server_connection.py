@@ -53,7 +53,7 @@ while run_server:
                     break
 
                 elif command == "inbox":
-                    output = json.dumps(server.show_inbox(username), indent=4)
+                    output = json.dumps(server.show_inbox(username), indent=4, default=str)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 

@@ -189,9 +189,8 @@ class Server:
             params=(username,))
         messages = self.db.database_transaction(
             query="""SELECT sender_username, message_content,sending_date
-             FROM users_messages WHERE recipient_username = %s;""",
+             FROM users_messages WHERE recipient_username = %s ORDER BY sending_date DESC;""",
             params=(username,))
-        print(messages)
         return messages
 
     def check_if_user_has_admin_privilege(self, username):
