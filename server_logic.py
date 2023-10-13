@@ -48,10 +48,21 @@ class Server:
             self.db.database_transaction(
                 query="""INSERT INTO server_versions VALUES (%s, %s);""",
                 params=(version_num, str(datetime.now().strftime("%d/%m/%Y, %H:%M"))))
-            message = {f"Success": f"New server version: {version_num}, has been added."}
+            return {f"Success": f"New server version: {version_num}, has been added."}
         else:
-            message = {f"Duplicate": f"Server version: {version_num}, already exists."}
-        return message
+            return {f"Duplicate": f"Server version: {version_num}, already exists."}
+
+    def delete_server_version(self, version_to_delete):
+        version_num_occurrence = self.db.database_transaction(
+            query="""SELECT COUNT(*) FROM server_versions WHERE version = %s;""",
+            params=(version_to_delete,))
+        if version_num_occurrence[0][0] == 0:
+            return {f"Version doesn't exist": f"Server doesn't have version '{version_to_delete}.'"}
+        else:
+            self.db.database_transaction(
+                query="""DELETE FROM server_versions WHERE version = %s;""",
+                params=(version_to_delete,))
+            return {f"Version deleted": f"Server version '{version_to_delete}' successfully deleted."}
 
     def get_server_uptime(self):
         current_time = datetime.now()
@@ -102,7 +113,7 @@ class Server:
                 "User doesn't exists": f"The user '{username_to_delete}' doesn't exists."
             }
             return error_message_user_doesnt_exists
-        elif self.check_if_user_has_admin_privilege(username_to_delete):
+        elif self.check_if_user_has_admin_privileges(username_to_delete):
             error_message_cant_delete_admin = {
                 "User with admin privileges": f"The user '{username_to_delete}' has admin privileges, you can't delete him."
             }
@@ -158,7 +169,7 @@ class Server:
             if len(message) <= 255:
                 if (self.count_unread_messages_in_user_inbox(
                         recipient_username) < INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
-                        self.check_if_user_has_admin_privilege(recipient_username)):
+                        self.check_if_user_has_admin_privileges(recipient_username)):
                     self.db.database_transaction(
                         query="""INSERT INTO users_messages(sender_username,
                                     recipient_username,
@@ -191,7 +202,7 @@ class Server:
                 if recipient_username != sender_username:
                     if (self.count_unread_messages_in_user_inbox(
                             recipient_username) < INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
-                            self.check_if_user_has_admin_privilege(recipient_username)):
+                            self.check_if_user_has_admin_privileges(recipient_username)):
                         self.db.database_transaction(
                             query="""INSERT INTO users_messages(sender_username,
                                                                 recipient_username,
@@ -226,7 +237,7 @@ class Server:
 
         return messages
 
-    def check_if_user_has_admin_privilege(self, username):
+    def check_if_user_has_admin_privileges(self, username):
         result = self.db.database_transaction(
             query="""SELECT COUNT(*) FROM users_privileges WHERE username = %s AND privilege = %s;""",
             params=(username, "admin"))

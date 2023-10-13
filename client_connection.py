@@ -69,6 +69,12 @@ while run_client:
                     client_socket.send(server_version_number)
                     print(client_socket.recv(client.buffer).decode("utf8"))
 
+                elif command.decode("utf8") == 'delete-server-version' and command.decode("utf8") in available_commands_list:
+                    client_socket.send(command)
+                    server_version_number_to_delete = verify_input('Which server version you want to delete: ')
+                    client_socket.send(server_version_number_to_delete)
+                    print(client_socket.recv(client.buffer).decode("utf8"))
+
                 elif command.decode("utf8") == 'change-privileges' and command.decode("utf8") in available_commands_list:
                     client_socket.send(command)
                     username_to_change_privilege = verify_input('To which user you want to change privileges: ')

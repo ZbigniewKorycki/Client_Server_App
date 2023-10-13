@@ -34,9 +34,9 @@ while run_server:
             msg = output.encode("utf8")
             client_socket.send(msg)
 
-            if server.check_if_user_has_admin_privilege(username):
+            if server.check_if_user_has_admin_privileges(username):
                 available_commands = ['send', 'send-to-all', 'inbox', 'add-user', 'help', 'info', 'uptime', 'logout',
-                                      'stop', 'add-server-version', 'delete-user','change-privileges']
+                                      'stop', 'add-server-version', 'delete-user','change-privileges', 'delete-server-version']
             else:
                 available_commands = ['send', 'inbox', 'logout']
             output = json.dumps(available_commands, indent=4)
@@ -64,54 +64,60 @@ while run_server:
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
-                elif command == 'help' and server.check_if_user_has_admin_privilege(username):
+                elif command == 'help' and server.check_if_user_has_admin_privileges(username):
                     output = json.dumps(commands.commands_description, indent=4)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
-                elif command == 'info' and server.check_if_user_has_admin_privilege(username):
+                elif command == 'info' and server.check_if_user_has_admin_privileges(username):
                     output = json.dumps(server.get_server_versions(), indent=4, default=str)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
-                elif command == 'uptime' and server.check_if_user_has_admin_privilege(username):
+                elif command == 'uptime' and server.check_if_user_has_admin_privileges(username):
                     output = json.dumps({"server_uptime": str(server.get_server_uptime())}, indent=4, default=str)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
-                elif command == 'send-to-all' and server.check_if_user_has_admin_privilege(username):
+                elif command == 'send-to-all' and server.check_if_user_has_admin_privileges(username):
                     message = client_socket.recv(server.buffer).decode("utf8")
                     output = json.dumps(server.send_message_to_all(username, message), indent=4, default=str)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
-                elif command == 'add-user' and server.check_if_user_has_admin_privilege(username):
+                elif command == 'add-user' and server.check_if_user_has_admin_privileges(username):
                     new_username = client_socket.recv(server.buffer).decode("utf8")
                     output = json.dumps(server.add_user(new_username), indent=4)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
-                elif command == 'delete-user' and server.check_if_user_has_admin_privilege(username):
+                elif command == 'delete-user' and server.check_if_user_has_admin_privileges(username):
                     username_to_delete = client_socket.recv(server.buffer).decode("utf8")
                     output = json.dumps(server.delete_user(username_to_delete), indent=4)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
-                elif command == 'change-privileges' and server.check_if_user_has_admin_privilege(username):
+                elif command == 'change-privileges' and server.check_if_user_has_admin_privileges(username):
                     username_to_change_privilege = client_socket.recv(server.buffer).decode("utf8")
                     new_privilege = client_socket.recv(server.buffer).decode("utf8")
                     output = json.dumps(server.change_user_privileges(username_to_change_privilege, new_privilege), indent=4)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
-                elif command == 'stop' and server.check_if_user_has_admin_privilege(username):
+                elif command == 'stop' and server.check_if_user_has_admin_privileges(username):
                     server_socket.close()
                     run_server = False
                     break
 
-                elif command == 'add-server-version' and server.check_if_user_has_admin_privilege(username):
+                elif command == 'add-server-version' and server.check_if_user_has_admin_privileges(username):
                     server_version_number = client_socket.recv(server.buffer).decode("utf8")
                     output = json.dumps(server.add_server_version(server_version_number), indent=4)
+                    msg = output.encode("utf8")
+                    client_socket.send(msg)
+
+                elif command == 'delete-server-version' and server.check_if_user_has_admin_privileges(username):
+                    server_version_number_to_delete = client_socket.recv(server.buffer).decode("utf8")
+                    output = json.dumps(server.delete_server_version(server_version_number_to_delete), indent=4)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
