@@ -74,17 +74,19 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("User deleted", result_after_deletion)
         self.assertFalse(self.server.check_if_username_exists(username="test_user123"))
 
-    # def test_login_in(self):
-    #     self.server.add_user(username="user_test_12")
-    #     user_password = self.server.users_with_passwords[0]['password']
-    #     incorrect_user_username = "test_user"
-    #     incorrect_user_password = "test_password"
-    #     result_correct_user_and_password = self.server.login_into_system("user", user_password)
-    #     result_incorrect_user_correct_password = self.server.login_into_system(incorrect_user_username, user_password)
-    #     result_correct_user_incorrect_password = self.server.login_into_system("user", incorrect_user_password)
-    #     self.assertTrue(result_correct_user_and_password)
-    #     self.assertFalse(result_incorrect_user_correct_password)
-    #     self.assertFalse(result_correct_user_incorrect_password)
+    def test_login_in(self):
+        self.server.add_user(username="user_test123")
+        password = self.server.db.database_transaction(query="""SELECT password FROM users_passwords WHERE username = %s;""",
+                                            params=("user_test123",))[0]
+        incorrect_user_username = "test_user"
+        incorrect_user_password = "test_password"
+        result_correct_user_and_password = self.server.login_into_system("user_test123", password)
+        result_incorrect_user_correct_password = self.server.login_into_system(incorrect_user_username, password)
+        result_correct_user_incorrect_password = self.server.login_into_system("user_test123", incorrect_user_password)
+        self.assertTrue(result_correct_user_and_password)
+        self.assertFalse(result_incorrect_user_correct_password)
+        self.assertFalse(result_correct_user_incorrect_password)
+        self.server.delete_user("user_test123")
     #
     def test_recognize_admin_privileges(self):
         self.server.add_user(username="test_admin", privileges="admin")
@@ -125,26 +127,19 @@ class TestServerLogic(unittest.TestCase):
         self.assertFalse(result_user_incorrect)
         self.server.delete_user("test_user")
 
-    #
-    # def test_recipient_inbox_user_privileges(self):
-    #     self.server.add_user("user1")
-    #     self.server.add_user("user2")
-    #     sender = self.server.get_user_if_exists(username="user1")
-    #     recipient = self.server.get_user_if_exists(username="user2")
-    #     for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 2):
-    #         self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
-    #     messages_in_recipient_inbox = recipient.unread_messages_in_inbox
-    #     self.assertEqual(messages_in_recipient_inbox, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
-    #
-    # def test_recipient_inbox_admin_privileges(self):
-    #     self.server.add_user("user1")
-    #     self.server.add_user("user-admin", privileges="admin")
-    #     sender = self.server.get_user_if_exists(username="user1")
-    #     recipient_admin = self.server.get_user_if_exists(username="user-admin")
-    #     for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER * 2):
-    #         self.server.send_message(sender=sender, recipient_username="user-admin", message="test_message")
-    #     messages_in_recipient_inbox = recipient_admin.unread_messages_in_inbox
-    #     self.assertEqual(messages_in_recipient_inbox, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER*2)
+    def test_recipient_inbox_admin_privileges(self):
+        self.server.add_user("user1")
+        self.server.add_user("user-admin", privileges="admin")
+        for _ in range(self.server.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER):
+            self.server.send_message(sender_username="user1", recipient_username="user-admin", message="test_message")
+        result_message_over_limit = self.server.send_message(sender_username="user1", recipient_username="user-admin",
+                                                             message="test_message")
+        self.assertIn("Message sent", result_message_over_limit)
+        messages_in_admin_inbox = self.server.count_unread_messages_in_user_inbox("user-admin")
+        self.assertEqual(messages_in_admin_inbox, self.server.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER + 1)
+        self.server.change_user_privileges("user-admin", "user")
+        self.server.delete_user("user1")
+        self.server.delete_user("user-admin")
     #
     def test_should_sender_gets_info_when_recipient_has_full_inbox(self):
         self.server.add_user("user1")
@@ -152,9 +147,9 @@ class TestServerLogic(unittest.TestCase):
         for x in range(self.server.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER):
             self.server.send_message(sender_username="user1", recipient_username="user2", message="test_message")
         result_message_over_limit = self.server.send_message(sender_username="user1", recipient_username="user2", message="test_message")
-        messages_in_recipient_inbox = self.server.count_unread_messages_in_user_inbox("user2")
+        unread_messages_in_recipient_inbox = self.server.count_unread_messages_in_user_inbox("user2")
         self.assertIn("Inbox limit", result_message_over_limit)
-        self.assertEqual(messages_in_recipient_inbox, self.server.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
+        self.assertEqual(unread_messages_in_recipient_inbox, self.server.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
         self.server.delete_user("user1")
         self.server.delete_user("user2")
 
