@@ -13,6 +13,7 @@ class Server:
         self.port = port
         self.buffer = 1024
         self.db = db
+        self.creation_time = datetime.now()
         self.create_db_tables()
         self.add_server_version(start_version)
         self.generate_admin_token(num_of_tokens=5)
@@ -73,10 +74,7 @@ class Server:
 
     def get_server_uptime(self):
         current_time = datetime.now()
-        server_time = self.db.database_transaction(
-            query="""SELECT version_date FROM server_versions ORDER BY version_date DESC;""")
-        server_time_datetime = datetime.strptime(str(server_time[0][0]), '%Y-%m-%d %H:%M:%S')
-        server_uptime = current_time - server_time_datetime
+        server_uptime = current_time - self.creation_time
         return server_uptime
 
     def add_user(self, username, privileges="user"):
