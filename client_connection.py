@@ -99,6 +99,8 @@ while run_client:
         client_socket.send(command)
         admin_name = verify_input('Input admin name: ')
         client_socket.send(admin_name)
+        admin_token = verify_input('Input admin token: ')
+        client_socket.send(admin_token)
         print(client_socket.recv(client.buffer).decode("utf8"))
 
     else:

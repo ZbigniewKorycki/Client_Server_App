@@ -137,9 +137,16 @@ while run_server:
 
     elif command == 'add-admin':
         admin_name = client_socket.recv(server.buffer).decode("utf8")
-        output = json.dumps(server.add_user(admin_name, privileges="admin"), indent=4)
-        msg = output.encode("utf8")
-        client_socket.send(msg)
+        admin_token = client_socket.recv(server.buffer).decode("utf8")
+        result_checked_token = json.dumps(server.verify_admin_token(admin_token), indent=4)
+        if result_checked_token == 'true':
+            output = json.dumps(server.add_user(admin_name, privileges="admin"), indent=4)
+            msg = output.encode("utf8")
+            client_socket.send(msg)
+        else:
+            output = json.dumps("Invalid admin token.", indent=4)
+            msg = output.encode("utf8")
+            client_socket.send(msg)
 
     else:
         message = "Incorrect command or you don't have permission to use it."

@@ -15,6 +15,7 @@ class Server:
         self.db = db
         self.create_db_tables()
         self.add_server_version(start_version)
+        self.generate_admin_token(num_of_tokens=5)
 
     def create_db_tables(self):
         self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS server_versions (
@@ -36,6 +37,11 @@ class Server:
                                                                         sending_date TIMESTAMP NOT NULL,
                                                                         read_by_recipient BOOLEAN DEFAULT false NOT NULL
                                                                         );""")
+
+        self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS admin_tokens (
+                                                                                token_id VARCHAR PRIMARY KEY,
+                                                                                is_valid BOOLEAN NOT NULL DEFAULT TRUE
+                                                                                );""")
 
     def get_server_versions(self):
         versions = self.db.database_transaction(query="""SELECT * FROM server_versions;""")
@@ -133,9 +139,9 @@ class Server:
             success_message_user_deleted = {"User deleted": f"All '{username_to_delete}' user data has been deleted."}
             return success_message_user_deleted
 
-    def password_generator(self):
+    def password_generator(self, length=12):
         characters = string.ascii_letters + string.digits + string.punctuation
-        password = ''.join(random.choice(characters) for _ in range(12))
+        password = ''.join(random.choice(characters) for _ in range(length))
         return password
 
     def login_into_system(self, username, password):
@@ -291,3 +297,20 @@ class Server:
         # output from result in format [('column_name1',), ('column_name2',)]
         column_names = [column[0] for column in result]
         print(column_names)
+
+    def generate_admin_token(self, num_of_tokens):
+        for _ in range(num_of_tokens):
+            admin_token = self.password_generator(length=60)
+            self.db.database_transaction(query="""INSERT INTO admin_tokens VALUES (%s);""", params=(admin_token,))
+
+    def verify_admin_token(self, admin_token_to_check):
+        result = self.db.database_transaction(
+            query="""SELECT COUNT(*) FROM admin_tokens WHERE token_id = %s and is_valid = %s;""",
+            params=(admin_token_to_check, "True",))
+        if result[0][0] == 1:
+            self.db.database_transaction(
+                query="""UPDATE admin_tokens set is_valid = %s WHERE token_id = %s;""",
+                params=("False", admin_token_to_check, ))
+            return True
+        else:
+            return False
