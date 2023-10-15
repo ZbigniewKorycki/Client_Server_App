@@ -10,6 +10,13 @@ class TestServerLogic(unittest.TestCase):
     def setUp(self):
         self.server = Server('192.168.0.163', 61033, db=PostgresSQLConnection("test_db"))
 
+    def tearDown(self):
+        result = self.server.db.database_transaction("""SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'""")
+        table_names = [table_name[0] for table_name in result]
+        for table in table_names:
+            self.server.db.database_transaction(f"""DROP TABLE IF EXISTS {table} CASCADE;""")
+
+
     def test_server_uptime(self):
         result = self.server.get_server_uptime()
         self.assertIsInstance(result, datetime.timedelta)
@@ -227,6 +234,9 @@ class TestServerLogic(unittest.TestCase):
         self.server.delete_user("John")
         self.server.delete_user("Peter")
         self.server.delete_user("Adam")
+
+
+
 
 
 

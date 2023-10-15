@@ -22,7 +22,7 @@ class PostgresSQLConnection:
             host=self.host,
             port=self.port)
 
-    def execute_query(self, query, params):
+    def execute_query(self, query, params=None):
         if not self.connection:
             self.connect_with_db()
         self.connection.autocommit = False
