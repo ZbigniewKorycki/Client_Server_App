@@ -1,5 +1,5 @@
 class Client:
-    def __init__(self, host, port, buffer):
+    def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.buffer = buffer
+        self.buffer = 1024

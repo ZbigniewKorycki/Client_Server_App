@@ -12,7 +12,7 @@ def verify_input(input_description):
             continue
 
 
-client = Client('192.168.0.163', 61033, 1024)
+client = Client('192.168.0.163', 61033)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((client.host, client.port))
 

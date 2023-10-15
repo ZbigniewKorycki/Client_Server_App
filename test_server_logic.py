@@ -7,7 +7,7 @@ import commands
 class TestServerLogic(unittest.TestCase):
 
     def setUp(self):
-        self.server = Server('192.168.0.163', 61033, 1024)
+        self.server = Server('192.168.0.163', 61033)
 
     def test_server_uptime(self):
         result = self.server.get_server_uptime()
@@ -146,18 +146,18 @@ class TestServerLogic(unittest.TestCase):
     #     messages_in_recipient_inbox = recipient_admin.unread_messages_in_inbox
     #     self.assertEqual(messages_in_recipient_inbox, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER*2)
     #
-    # def test_should_sender_gets_info_when_recipient_has_full_inbox(self):
-    #     self.server.add_user("user1")
-    #     self.server.add_user("user2")
-    #     sender = self.server.get_user_if_exists(username="user1")
-    #     recipient = self.server.get_user_if_exists(username="user2")
-    #     for _ in range(User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER):
-    #         self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
-    #     result_message_over_limit = self.server.send_message(sender=sender, recipient_username="user2", message="test_message")
-    #     messages_in_recipient_inbox = recipient.unread_messages_in_inbox
-    #     self.assertIn("Inbox limit", result_message_over_limit)
-    #     self.assertEqual(messages_in_recipient_inbox, User.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
-    #
+    def test_should_sender_gets_info_when_recipient_has_full_inbox(self):
+        self.server.add_user("user1")
+        self.server.add_user("user2")
+        for x in range(self.server.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER):
+            self.server.send_message(sender_username="user1", recipient_username="user2", message="test_message")
+        result_message_over_limit = self.server.send_message(sender_username="user1", recipient_username="user2", message="test_message")
+        messages_in_recipient_inbox = self.server.count_unread_messages_in_user_inbox("user2")
+        self.assertIn("Inbox limit", result_message_over_limit)
+        self.assertEqual(messages_in_recipient_inbox, self.server.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
+        self.server.delete_user("user1")
+        self.server.delete_user("user2")
+
 
     def test_send_message_to_all_users(self):
         self.server.add_user("user-admin", privileges="admin")

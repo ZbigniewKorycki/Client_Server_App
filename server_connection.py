@@ -3,7 +3,7 @@ import commands
 import json
 from server_logic import Server
 
-server = Server('192.168.0.163', 61033, 1024)
+server = Server('192.168.0.163', 61033)
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((server.host, server.port))

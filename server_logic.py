@@ -3,14 +3,14 @@ import random
 import string
 from db_connection import PostgresSQLConnection
 
-INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER = 5
-
 
 class Server:
-    def __init__(self, host, port, buffer, start_version="0.1.0"):
+
+    INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER = 5
+    def __init__(self, host, port, start_version="0.1.0"):
         self.host = host
         self.port = port
-        self.buffer = buffer
+        self.buffer = 1024
         self.db = PostgresSQLConnection()
         self.create_db_tables()
         self.add_server_version(start_version)
@@ -168,7 +168,7 @@ class Server:
         else:
             if len(message) <= 255:
                 if (self.count_unread_messages_in_user_inbox(
-                        recipient_username) < INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
+                        recipient_username) < self.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
                         self.check_if_user_has_admin_privileges(recipient_username)):
                     self.db.database_transaction(
                         query="""INSERT INTO users_messages(sender_username,
@@ -201,7 +201,7 @@ class Server:
             for recipient_username in self.get_all_users_list():
                 if recipient_username != sender_username:
                     if (self.count_unread_messages_in_user_inbox(
-                            recipient_username) < INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
+                            recipient_username) < self.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
                             self.check_if_user_has_admin_privileges(recipient_username)):
                         self.db.database_transaction(
                             query="""INSERT INTO users_messages(sender_username,
