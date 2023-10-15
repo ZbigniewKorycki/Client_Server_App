@@ -11,11 +11,11 @@ class TestServerLogic(unittest.TestCase):
         self.server = Server('192.168.0.163', 61033, db=PostgresSQLConnection("test_db"))
 
     def tearDown(self):
-        result = self.server.db.database_transaction("""SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'""")
+        result = self.server.db.database_transaction(
+            query="""SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'""")
         table_names = [table_name[0] for table_name in result]
         for table in table_names:
             self.server.db.database_transaction(f"""DROP TABLE IF EXISTS {table} CASCADE;""")
-
 
     def test_server_uptime(self):
         result = self.server.get_server_uptime()
@@ -95,7 +95,6 @@ class TestServerLogic(unittest.TestCase):
         self.assertTrue(result_correct_user_and_password)
         self.assertFalse(result_incorrect_user_correct_password)
         self.assertFalse(result_correct_user_incorrect_password)
-        self.server.delete_user("user_test123")
 
     def test_recognize_admin_privileges(self):
         self.server.add_user(username="test_admin", privileges="admin")
@@ -108,9 +107,6 @@ class TestServerLogic(unittest.TestCase):
         self.assertFalse(result_if_admin_user_privileges)
         self.assertFalse(result_if_admin_unknown_privileges)
         self.server.change_user_privileges("test_admin", "user")
-        self.server.delete_user("test_admin")
-        self.server.delete_user("test_admin_1")
-        self.server.delete_user("test_admin_2")
 
     def test_send_message(self):
         self.server.add_user(username="user1")
@@ -127,8 +123,6 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("No recipient", result_recipient_unknown)
         self.assertIn("Message sent", result_correct_data)
         self.assertIn("Character limit reached", result_over_255_characters)
-        self.server.delete_user("user1")
-        self.server.delete_user("user2")
 
     def test_should_find_existed_user(self):
         self.server.add_user(username="test_user")
@@ -136,7 +130,6 @@ class TestServerLogic(unittest.TestCase):
         result_user_incorrect = self.server.check_if_username_exists(username="random_user")
         self.assertTrue(result_user)
         self.assertFalse(result_user_incorrect)
-        self.server.delete_user("test_user")
 
     def test_recipient_inbox_admin_privileges(self):
         self.server.add_user("user1")
@@ -148,9 +141,6 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("Message sent", result_message_over_limit)
         messages_in_admin_inbox = self.server.count_unread_messages_in_user_inbox("user-admin")
         self.assertEqual(messages_in_admin_inbox, self.server.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER + 1)
-        self.server.change_user_privileges("user-admin", "user")
-        self.server.delete_user("user1")
-        self.server.delete_user("user-admin")
 
     def test_should_sender_gets_info_when_recipient_has_full_inbox(self):
         self.server.add_user("user1")
@@ -165,8 +155,6 @@ class TestServerLogic(unittest.TestCase):
         unread_messages_in_recipient_inbox = self.server.count_unread_messages_in_user_inbox("user2")
         self.assertIn("Inbox limit", result_message_over_limit)
         self.assertEqual(unread_messages_in_recipient_inbox, self.server.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
-        self.server.delete_user("user1")
-        self.server.delete_user("user2")
 
     def test_send_message_to_all_users(self):
         self.server.add_user("user-admin", privileges="admin")
@@ -176,10 +164,6 @@ class TestServerLogic(unittest.TestCase):
         self.assertEqual(len(result), 5)
         self.assertIn("recipient", result[0])
         self.assertIn("result", result[0])
-        for x in range(5):
-            self.server.delete_user(f"user{x}")
-        self.server.change_user_privileges("user-admin", "user")
-        self.server.delete_user("user-admin")
 
     def test_send_message_to_all_users_over_255_characters(self):
         self.server.add_user("user-admin", privileges="admin")
@@ -187,16 +171,11 @@ class TestServerLogic(unittest.TestCase):
             self.server.add_user(f"user{x}")
         result = self.server.send_message_to_all(sender_username="user-admin", message="M" * 256)
         self.assertIn("Character limit reached", result)
-        for x in range(5):
-            self.server.delete_user(f"user{x}")
-        self.server.change_user_privileges("user-admin", "user")
-        self.server.delete_user("user-admin")
 
     def test_should_empty_inbox_returned(self):
         self.server.add_user("user1")
         result = self.server.show_inbox("user1")
         self.assertEqual(result, [])
-        self.server.delete_user("user1")
 
     def test_should_inbox_shown_with_messages(self):
         self.server.add_user("user1")
@@ -211,16 +190,12 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("test message from user2", result_latest_message)
         self.assertIn("user1", result_oldest_message)
         self.assertIn("test message from user1", result_oldest_message)
-        self.server.delete_user("user1")
-        self.server.delete_user("user2")
-        self.server.delete_user("user3")
 
     def test_show_user_base_interface(self):
         self.server.add_user("user9")
         inbox_info = self.server.user_base_interface("user9")
         self.assertIn("0 unread messages", inbox_info)
         self.assertTrue(self.server.check_if_username_exists("user9"))
-        self.server.delete_user("user9")
 
     def test_get_all_users_list(self):
         self.server.add_user("John")
@@ -231,13 +206,6 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("John", user_list)
         self.assertIn("Peter", user_list)
         self.assertIn("Adam", user_list)
-        self.server.delete_user("John")
-        self.server.delete_user("Peter")
-        self.server.delete_user("Adam")
-
-
-
-
 
 
 class TestCommandsDescription(unittest.TestCase):
