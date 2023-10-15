@@ -103,21 +103,22 @@ class TestServerLogic(unittest.TestCase):
         self.server.delete_user("test_admin_1")
         self.server.delete_user("test_admin_2")
 
-    #
-    # def test_send_message(self):
-    #     self.server.add_user(username="user1")
-    #     self.server.add_user(username="user2")
-    #     sender = self.server.get_user_if_exists(username="user1")
-    #     result_recipient_unknown = self.server.send_message(sender=sender, recipient_username="user_unknown",
-    #                                                         message="test_message")
-    #     result_success = self.server.send_message(sender=sender, recipient_username="user2",
-    #                                               message="test_message")
-    #     result_over_255 = self.server.send_message(sender=sender, recipient_username="user2",
-    #                                                message="L" * 256)
-    #     self.assertIn("No recipient", result_recipient_unknown)
-    #     self.assertIn("Message sent", result_success)
-    #     self.assertIn("Character limit reached", result_over_255)
-    #
+
+    def test_send_message(self):
+        self.server.add_user(username="user1")
+        self.server.add_user(username="user2")
+        result_recipient_unknown = self.server.send_message(sender_username="user1", recipient_username="user_unknown",
+                                                            message="test message")
+        result_correct_data = self.server.send_message(sender_username="user1", recipient_username="user2",
+                                                  message="test message")
+        result_over_255_characters = self.server.send_message(sender_username="user1", recipient_username="user2",
+                                                   message="M" * 256)
+        self.assertIn("No recipient", result_recipient_unknown)
+        self.assertIn("Message sent", result_correct_data)
+        self.assertIn("Character limit reached", result_over_255_characters)
+        self.server.delete_user("user1")
+        self.server.delete_user("user2")
+
 
     def test_should_find_existed_user(self):
         self.server.add_user(username="test_user")
@@ -178,23 +179,28 @@ class TestServerLogic(unittest.TestCase):
         self.server.change_user_privileges("user-admin", "user")
         self.server.delete_user("user-admin")
 
-    # def test_should_empty_inbox_returned(self):
-    #     self.server.add_user("user1")
-    #     user = self.server.get_user_if_exists(username="user1")
-    #     result = self.server.show_inbox(user)
-    #     self.assertEqual(result, [])
-    #
-    # def test_should_inbox_shown_with_messages(self):
-    #     self.server.add_user("user1")
-    #     self.server.add_user("user2")
-    #     sender = self.server.get_user_if_exists(username="user1")
-    #     recipient = self.server.get_user_if_exists(username="user2")
-    #     self.server.send_message(sender, "user2", "test-message")
-    #     result = self.server.show_inbox(recipient)[0]
-    #     self.assertIn("message", result)
-    #     self.assertIn("recipient", result)
-    #     self.assertIn("sender", result)
-    #     self.assertIn("status", result)
+    def test_should_empty_inbox_returned(self):
+        self.server.add_user("user1")
+        result = self.server.show_inbox("user1")
+        self.assertEqual(result, [])
+        self.server.delete_user("user1")
+
+    def test_should_inbox_shown_with_messages(self):
+        self.server.add_user("user1")
+        self.server.add_user("user2")
+        self.server.add_user("user3")
+        self.server.send_message("user1", "user3", "test message from user1")
+
+        self.server.send_message("user2", "user3", "test message from user2")
+        result_latest_message = self.server.show_inbox("user3")[-1]
+        result_oldest_message = self.server.show_inbox("user3")[0]
+        self.assertIn("user2", result_latest_message)
+        self.assertIn("test message from user2", result_latest_message)
+        self.assertIn("user1", result_oldest_message)
+        self.assertIn("test message from user1", result_oldest_message)
+        self.server.delete_user("user1")
+        self.server.delete_user("user2")
+        self.server.delete_user("user3")
 
     def test_show_user_base_interface(self):
         self.server.add_user("user9")
