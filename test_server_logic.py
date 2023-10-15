@@ -2,12 +2,13 @@ import unittest
 from server_logic import Server
 import datetime
 import commands
+from db_connection import PostgresSQLConnection
 
 
 class TestServerLogic(unittest.TestCase):
 
     def setUp(self):
-        self.server = Server('192.168.0.163', 61033)
+        self.server = Server('192.168.0.163', 61033, db=PostgresSQLConnection("test_db"))
 
     def test_server_uptime(self):
         result = self.server.get_server_uptime()
@@ -213,6 +214,20 @@ class TestServerLogic(unittest.TestCase):
         self.assertIn("0 unread messages", inbox_info)
         self.assertTrue(self.server.check_if_username_exists("user9"))
         self.server.delete_user("user9")
+
+    def test_get_all_users_list(self):
+        self.server.add_user("John")
+        self.server.add_user("Peter")
+        self.server.add_user("Adam")
+        user_list = self.server.get_all_users_list()
+        self.assertEqual(len(user_list), 3)
+        self.assertIn("John", user_list)
+        self.assertIn("Peter", user_list)
+        self.assertIn("Adam", user_list)
+        self.server.delete_user("John")
+        self.server.delete_user("Peter")
+        self.server.delete_user("Adam")
+
 
 
 class TestCommandsDescription(unittest.TestCase):

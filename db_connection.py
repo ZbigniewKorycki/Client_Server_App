@@ -6,8 +6,8 @@ config_data = config()
 
 class PostgresSQLConnection:
 
-    def __init__(self):
-        self.dbname = config_data['database']
+    def __init__(self, dbname=config_data['database']):
+        self.dbname = dbname
         self.user = config_data['user']
         self.password = config_data['password']
         self.host = config_data['host']

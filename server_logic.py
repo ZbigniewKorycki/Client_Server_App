@@ -8,11 +8,11 @@ class Server:
 
     INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER = 5
 
-    def __init__(self, host, port, start_version="0.1.0"):
+    def __init__(self, host, port, start_version="0.1.0", db=PostgresSQLConnection()):
         self.host = host
         self.port = port
         self.buffer = 1024
-        self.db = PostgresSQLConnection()
+        self.db = db
         self.create_db_tables()
         self.add_server_version(start_version)
 
