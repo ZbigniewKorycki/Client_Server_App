@@ -7,6 +7,7 @@ from db_connection import PostgresSQLConnection
 class Server:
 
     INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER = 5
+
     def __init__(self, host, port, start_version="0.1.0"):
         self.host = host
         self.port = port
@@ -115,7 +116,8 @@ class Server:
             return error_message_user_doesnt_exists
         elif self.check_if_user_has_admin_privileges(username_to_delete):
             error_message_cant_delete_admin = {
-                "User with admin privileges": f"The user '{username_to_delete}' has admin privileges, you can't delete him."
+                "User with admin privileges":
+                    f"The user '{username_to_delete}' has admin privileges, you can't delete him."
             }
             return error_message_cant_delete_admin
         else:
@@ -261,8 +263,8 @@ class Server:
         else:
             self.db.database_transaction(query="""UPDATE users_privileges SET privileges = %s WHERE username = %s;""",
                                          params=(new_privileges, username,))
-            message_privileges_changed = {"Privileges changed":
-                                              f"The user '{username}' now has an {new_privileges} privileges."}
+            message_privileges_changed =\
+                {"Privileges changed": f"The user '{username}' now has an {new_privileges} privileges."}
             return message_privileges_changed
 
     def count_unread_messages_in_user_inbox(self, username):

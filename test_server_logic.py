@@ -62,7 +62,7 @@ class TestServerLogic(unittest.TestCase):
 
     def test_dont_add_username_with_space(self):
         result = self.server.add_user(username="test   user")
-        result1 = self.server.add_user(username="testuser      ")
+        result1 = self.server.add_user(username="test_user      ")
         self.assertIn("No space in username allowed", result)
         self.assertIn("No space in username allowed", result1)
 
@@ -76,8 +76,9 @@ class TestServerLogic(unittest.TestCase):
 
     def test_login_in(self):
         self.server.add_user(username="user_test123")
-        password = self.server.db.database_transaction(query="""SELECT password FROM users_passwords WHERE username = %s;""",
-                                            params=("user_test123",))[0]
+        password = self.server.db.database_transaction(
+            query="""SELECT password FROM users_passwords WHERE username = %s;""",
+            params=("user_test123",))[0]
         incorrect_user_username = "test_user"
         incorrect_user_password = "test_password"
         result_correct_user_and_password = self.server.login_into_system("user_test123", password)
@@ -87,7 +88,7 @@ class TestServerLogic(unittest.TestCase):
         self.assertFalse(result_incorrect_user_correct_password)
         self.assertFalse(result_correct_user_incorrect_password)
         self.server.delete_user("user_test123")
-    #
+
     def test_recognize_admin_privileges(self):
         self.server.add_user(username="test_admin", privileges="admin")
         self.server.add_user(username="test_admin_1", privileges="user")
@@ -103,22 +104,23 @@ class TestServerLogic(unittest.TestCase):
         self.server.delete_user("test_admin_1")
         self.server.delete_user("test_admin_2")
 
-
     def test_send_message(self):
         self.server.add_user(username="user1")
         self.server.add_user(username="user2")
-        result_recipient_unknown = self.server.send_message(sender_username="user1", recipient_username="user_unknown",
+        result_recipient_unknown = self.server.send_message(sender_username="user1",
+                                                            recipient_username="user_unknown",
                                                             message="test message")
-        result_correct_data = self.server.send_message(sender_username="user1", recipient_username="user2",
-                                                  message="test message")
-        result_over_255_characters = self.server.send_message(sender_username="user1", recipient_username="user2",
-                                                   message="M" * 256)
+        result_correct_data = self.server.send_message(sender_username="user1",
+                                                       recipient_username="user2",
+                                                       message="test message")
+        result_over_255_characters = self.server.send_message(sender_username="user1",
+                                                              recipient_username="user2",
+                                                              message="M" * 256)
         self.assertIn("No recipient", result_recipient_unknown)
         self.assertIn("Message sent", result_correct_data)
         self.assertIn("Character limit reached", result_over_255_characters)
         self.server.delete_user("user1")
         self.server.delete_user("user2")
-
 
     def test_should_find_existed_user(self):
         self.server.add_user(username="test_user")
@@ -141,19 +143,22 @@ class TestServerLogic(unittest.TestCase):
         self.server.change_user_privileges("user-admin", "user")
         self.server.delete_user("user1")
         self.server.delete_user("user-admin")
-    #
+
     def test_should_sender_gets_info_when_recipient_has_full_inbox(self):
         self.server.add_user("user1")
         self.server.add_user("user2")
         for x in range(self.server.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER):
-            self.server.send_message(sender_username="user1", recipient_username="user2", message="test_message")
-        result_message_over_limit = self.server.send_message(sender_username="user1", recipient_username="user2", message="test_message")
+            self.server.send_message(sender_username="user1",
+                                     recipient_username="user2",
+                                     message="test_message")
+        result_message_over_limit = self.server.send_message(sender_username="user1",
+                                                             recipient_username="user2",
+                                                             message="test_message")
         unread_messages_in_recipient_inbox = self.server.count_unread_messages_in_user_inbox("user2")
         self.assertIn("Inbox limit", result_message_over_limit)
         self.assertEqual(unread_messages_in_recipient_inbox, self.server.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER)
         self.server.delete_user("user1")
         self.server.delete_user("user2")
-
 
     def test_send_message_to_all_users(self):
         self.server.add_user("user-admin", privileges="admin")

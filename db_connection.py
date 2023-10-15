@@ -55,10 +55,3 @@ class PostgresSQLConnection:
             return fetched_data
         finally:
             self.close_connection_with_db()
-
-
-
-
-
-
-

@@ -35,8 +35,10 @@ while run_server:
             client_socket.send(msg)
 
             if server.check_if_user_has_admin_privileges(username):
-                available_commands = ['send', 'send-to-all', 'inbox', 'add-user', 'help', 'info', 'uptime', 'logout',
-                                      'stop', 'add-server-version', 'delete-user','change-privileges', 'delete-server-version']
+                available_commands = ['send', 'send-to-all', 'inbox', 'add-user',
+                                      'help', 'info', 'uptime', 'logout',
+                                      'stop', 'add-server-version', 'delete-user',
+                                      'change-privileges', 'delete-server-version']
             else:
                 available_commands = ['send', 'inbox', 'logout']
             output = json.dumps(available_commands, indent=4)
@@ -98,9 +100,9 @@ while run_server:
                     client_socket.send(msg)
 
                 elif command == 'change-privileges' and server.check_if_user_has_admin_privileges(username):
-                    username_to_change_privilege = client_socket.recv(server.buffer).decode("utf8")
+                    username_to_modify = client_socket.recv(server.buffer).decode("utf8")
                     new_privileges = client_socket.recv(server.buffer).decode("utf8")
-                    output = json.dumps(server.change_user_privileges(username_to_change_privilege, new_privilegenew_privileges), indent=4)
+                    output = json.dumps(server.change_user_privileges(username_to_modify, new_privileges), indent=4)
                     msg = output.encode("utf8")
                     client_socket.send(msg)
 
