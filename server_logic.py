@@ -19,8 +19,8 @@ class Server:
         self.generate_admin_token(num_of_tokens=5)
 
     def create_db_tables(self):
-        self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS server_versions (
-                                                                        version VARCHAR(20) PRIMARY KEY,
+        self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS server_versions (version_id SERIAL PRIMARY KEY,
+                                                                        version_num VARCHAR(20),
                                                                         version_date TIMESTAMP);""")
         self.db.database_transaction(query="""CREATE TABLE IF NOT EXISTS users_privileges (
                                                                         username VARCHAR PRIMARY KEY,
@@ -50,11 +50,11 @@ class Server:
 
     def add_server_version(self, version_num):
         version_num_occurrence = self.db.database_transaction(
-            query="""SELECT COUNT(*) FROM server_versions WHERE version = %s;""",
+            query="""SELECT COUNT(*) FROM server_versions WHERE version_num = %s;""",
             params=(version_num,))
         if version_num_occurrence[0][0] == 0:
             self.db.database_transaction(
-                query="""INSERT INTO server_versions VALUES (%s, %s);""",
+                query="""INSERT INTO server_versions (version_num, version_date) VALUES (%s, %s);""",
                 params=(version_num, str(datetime.now().strftime("%d/%m/%Y, %H:%M"))))
             return {f"Success": f"New server version: {version_num}, has been added."}
         else:
@@ -62,13 +62,13 @@ class Server:
 
     def delete_server_version(self, version_to_delete):
         version_num_occurrence = self.db.database_transaction(
-            query="""SELECT COUNT(*) FROM server_versions WHERE version = %s;""",
+            query="""SELECT COUNT(*) FROM server_versions WHERE version_num = %s;""",
             params=(version_to_delete,))
         if version_num_occurrence[0][0] == 0:
             return {f"Version doesn't exist": f"Server doesn't have version '{version_to_delete}.'"}
         else:
             self.db.database_transaction(
-                query="""DELETE FROM server_versions WHERE version = %s;""",
+                query="""DELETE FROM server_versions WHERE version_num = %s;""",
                 params=(version_to_delete,))
             return {f"Version deleted": f"Server version '{version_to_delete}' successfully deleted."}
 

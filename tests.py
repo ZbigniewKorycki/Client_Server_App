@@ -24,10 +24,10 @@ class TestServerLogic(unittest.TestCase):
 
     def test_add_delete_server_version(self):
         self.server.add_server_version("1.2.6")
-        result_all_versions_after_adding = [version[0] for version in self.server.get_server_versions()]
+        result_all_versions_after_adding = [version[1] for version in self.server.get_server_versions()]
         self.assertIn("1.2.6", result_all_versions_after_adding)
         self.server.delete_server_version("1.2.6")
-        result_all_versions_after_deletion = [version[0] for version in self.server.get_server_versions()]
+        result_all_versions_after_deletion = [version[1] for version in self.server.get_server_versions()]
         self.assertNotIn("1.2.6", result_all_versions_after_deletion)
 
     def test_generated_password(self):
