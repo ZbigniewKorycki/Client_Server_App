@@ -1,5 +1,5 @@
 import unittest
-from server_logic_sql_lite import Server
+from server_logic_with_sqlite import Server
 import datetime
 import commands
 from db_connection_sqlite import SQLiteConnection
@@ -12,7 +12,7 @@ class TestServerLogic(unittest.TestCase):
 
     def tearDown(self):
         result = self.server.db.get_all(
-            query="""SELECT name FROM sqlite_schema WHERE type = ?""", params=('table', ))
+            query="""SELECT name FROM sqlite_schema WHERE type = ?""", params=('table',))
         table_names = [table_name[0] for table_name in result]
         for table in table_names:
             self.server.db.execute_query(f"""DROP TABLE IF EXISTS {table}""", params=())
@@ -86,7 +86,7 @@ class TestServerLogic(unittest.TestCase):
         self.server.add_user(username="user_test123")
         password = self.server.db.get_one(
             query="""SELECT password FROM users_passwords WHERE username = ?""",
-            params=("user_test123", ))[0]
+            params=("user_test123",))[0]
         incorrect_user_username = "test_user"
         incorrect_user_password = "test_password"
         result_correct_user_and_password = self.server.login_into_system("user_test123", password)
@@ -226,6 +226,7 @@ class TestCommandsDescription(unittest.TestCase):
         self.assertIn("delete-user", result)
         self.assertIn("change-privileges", result)
 
+
 class TestDatabaseConnection(unittest.TestCase):
 
     def setUp(self):
@@ -233,7 +234,7 @@ class TestDatabaseConnection(unittest.TestCase):
 
     def tearDown(self):
         result = self.db.get_all(
-            query="""SELECT name FROM sqlite_schema WHERE type =?""", params=('table', ))
+            query="""SELECT name FROM sqlite_schema WHERE type =?""", params=('table',))
         table_names = [table_name[0] for table_name in result]
         for table in table_names:
             self.db.execute_query(f"""DROP TABLE IF EXISTS {table}""", params=())
@@ -244,6 +245,7 @@ class TestDatabaseConnection(unittest.TestCase):
         self.assertNotEqual(self.db.connection, None)
         self.db.close_connection_with_db()
         self.assertEqual(self.db.connection, None)
+
 
 if __name__ == '__main__':
     unittest.main()

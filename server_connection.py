@@ -1,7 +1,7 @@
 import socket
 import commands
 import json
-from server_logic import Server
+from server_logic_with_sqlite import Server
 
 server = Server('192.168.0.163', 61033)
 

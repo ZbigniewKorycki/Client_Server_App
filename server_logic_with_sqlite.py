@@ -22,9 +22,10 @@ class Server:
 
     def add_server_version(self, version_num):
         version_num_occurrence = self.db.get_all(
-            f"""SELECT COUNT(*) FROM server_versions WHERE version = ?""", params=(version_num, ))
+            f"""SELECT COUNT(*) FROM server_versions WHERE version = ?""", params=(version_num,))
         if version_num_occurrence[0][0] == 0:
-            self.db.execute_query("""INSERT INTO server_versions VALUES (?, ?)""", (version_num, datetime.now().strftime("%d/%m/%Y, %H:%M")))
+            self.db.execute_query("""INSERT INTO server_versions VALUES (?, ?)""",
+                                  (version_num, datetime.now().strftime("%d/%m/%Y, %H:%M")))
             return {f"Success": f"New server version: {version_num}, has been added."}
         else:
             return {f"Duplicate": f"Server version: {version_num}, already exists."}
@@ -72,11 +73,11 @@ class Server:
                 privileges = "user"
             password = self.password_generator()
             self.db.execute_query(query="""INSERT INTO users (username) VALUES (?);""",
-                                         params=(username,))
+                                  params=(username,))
             self.db.execute_query(query="""INSERT INTO users_passwords VALUES (?, ?);""",
-                                         params=(username, password))
+                                  params=(username, password))
             self.db.execute_query(query="""INSERT INTO users_privileges VALUES (?, ?);""",
-                                         params=(username, privileges))
+                                  params=(username, privileges))
             print(password)
             success_message = {
                 "User added": f"'{username}' has been successfully added do database."
@@ -113,7 +114,7 @@ class Server:
     def login_into_system(self, username, password):
         result = self.db.get_all(
             query="""SELECT COUNT(*) FROM users_passwords WHERE username = ? AND password = ?;""",
-            params=(username, password, ))
+            params=(username, password,))
         if result[0][0] == 1:
             return True
         else:
@@ -234,7 +235,7 @@ class Server:
             return error_message_incorrect_privileges
         else:
             self.db.execute_query(query="""UPDATE users_privileges SET privileges = ? WHERE username = ?;""",
-                                         params=(new_privileges, username,))
+                                  params=(new_privileges, username,))
             message_privileges_changed = \
                 {"Privileges changed": f"The user '{username}' now has an {new_privileges} privileges."}
             return message_privileges_changed
@@ -249,7 +250,7 @@ class Server:
 
     def get_all_users_list(self):
         result = self.db.get_all(
-            query="""SELECT username FROM users_privileges WHERE privileges = ?;""", params=("user", ))
+            query="""SELECT username FROM users_privileges WHERE privileges = ?;""", params=("user",))
         users_list = [user[0] for user in result]
         print(users_list)
         return users_list
@@ -267,7 +268,7 @@ class Server:
     def generate_admin_token(self, num_of_tokens):
         for _ in range(num_of_tokens):
             admin_token = self.password_generator(length=60)
-            self.db.execute_query(query="""INSERT INTO admin_tokens VALUES (?, ?);""", params=(admin_token, 1, ))
+            self.db.execute_query(query="""INSERT INTO admin_tokens VALUES (?, ?);""", params=(admin_token, 1,))
 
     def verify_admin_token(self, admin_token_to_check):
         result = self.db.get_all(
