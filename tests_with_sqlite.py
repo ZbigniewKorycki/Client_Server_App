@@ -246,6 +246,14 @@ class TestDatabaseConnection(unittest.TestCase):
         self.db.close_connection_with_db()
         self.assertEqual(self.db.connection, None)
 
+    def test_database_transaction(self):
+        result_incorrect_syntax = self.db.execute_query("""INCORRECT QUERY test_table VALUES ("value");""")
+        result_table_dont_exists = self.db.execute_query(
+            query="""INSERT INTO test_table VALUES (?, ?);""",
+            params=("1.9", 199))
+        self.assertFalse(result_incorrect_syntax)
+        self.assertFalse(result_table_dont_exists)
+
 
 if __name__ == '__main__':
     unittest.main()
