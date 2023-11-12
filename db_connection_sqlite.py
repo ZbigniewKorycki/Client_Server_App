@@ -20,38 +20,53 @@ class SQLiteConnection:
             self.connection = conn
 
     def execute_query(self, query, params=None):
-        if self.connection is None:
-            self.create_connection()
         connection = self.connection
-        cursor = connection.cursor()
-        cursor.execute(query, params)
-        connection.commit()
-        connection.close()
-        self.connection = None
+        if connection is None:
+            self.create_connection()
+        try:
+            connection = self.connection
+            cursor = connection.cursor()
+            cursor.execute(query, params)
+        except Error:
+            connection.rollback()
+        else:
+            connection.commit()
+        finally:
+            self.close_connection_with_db()
 
     def get_all(self, query, params=None):
-        if self.connection is None:
-            self.create_connection()
         connection = self.connection
-        cursor = connection.cursor()
-        cursor.execute(query, params)
-        items = cursor.fetchall()
-        connection.commit()
-        connection.close()
-        self.connection = None
-        return items
+        if connection is None:
+            self.create_connection()
+        try:
+            connection = self.connection
+            cursor = connection.cursor()
+            cursor.execute(query, params)
+            items = cursor.fetchall()
+        except Error:
+            connection.rollback()
+        else:
+            connection.commit()
+            return items
+        finally:
+            self.close_connection_with_db()
 
     def get_one(self, query, params=None):
-        if self.connection is None:
-            self.create_connection()
         connection = self.connection
-        cursor = connection.cursor()
-        cursor.execute(query, params)
-        item = cursor.fetchone()
-        connection.commit()
-        connection.close()
-        self.connection = None
-        return item
+        if connection is None:
+            self.create_connection()
+        try:
+            connection = self.connection
+            cursor = connection.cursor()
+            cursor.execute(query, params)
+            item = cursor.fetchone()
+        except Error:
+            connection.rollback()
+        else:
+            connection.commit()
+            return item
+        finally:
+            self.close_connection_with_db()
 
     def close_connection_with_db(self):
         if self.connection:
