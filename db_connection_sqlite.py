@@ -53,42 +53,6 @@ class SQLiteConnection:
         self.connection = None
         return item
 
-    def delete_query(self, query, params=None):
-        if self.connection is None:
-            self.create_connection()
-        connection = self.connection
-        cursor = connection.cursor()
-        cursor.execute(query, params)
-        item = cursor.fetchone()
-        connection.commit()
-        connection.close()
-        self.connection = None
-        return item
-
-    def update_query(self, query, params=None):
-        if self.connection is None:
-            self.create_connection()
-        connection = self.connection
-        cursor = connection.cursor()
-        cursor.execute(query, params)
-        item = cursor.fetchone()
-        connection.commit()
-        connection.close()
-        self.connection = None
-        return item
-
-    def insert_query(self, query, params=None):
-        if self.connection is None:
-            self.create_connection()
-        connection = self.connection
-        cursor = connection.cursor()
-        cursor.execute(query, params)
-        item = cursor.fetchone()
-        connection.commit()
-        connection.close()
-        self.connection = None
-        return item
-
     def close_connection_with_db(self):
         if self.connection:
             self.connection.close()

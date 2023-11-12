@@ -17,14 +17,14 @@ class Server:
         self.generate_admin_token(num_of_tokens=5)
 
     def get_server_versions(self):
-        versions = self.db.get_all(query="""SELECT * FROM server_versions;""")
+        versions = self.db.get_all(query="""SELECT * FROM server_versions;""", params=())
         return versions
 
     def add_server_version(self, version_num):
         version_num_occurrence = self.db.get_all(
             f"""SELECT COUNT(*) FROM server_versions WHERE version = ?""", params=(version_num, ))
         if version_num_occurrence[0][0] == 0:
-            self.db.insert_query("""INSERT INTO server_versions VALUES (?, ?)""", (version_num, datetime.now().strftime("%d/%m/%Y, %H:%M")))
+            self.db.execute_query("""INSERT INTO server_versions VALUES (?, ?)""", (version_num, datetime.now().strftime("%d/%m/%Y, %H:%M")))
             return {f"Success": f"New server version: {version_num}, has been added."}
         else:
             return {f"Duplicate": f"Server version: {version_num}, already exists."}
@@ -36,7 +36,7 @@ class Server:
         if version_num_occurrence[0][0] == 0:
             return {f"Version doesn't exist": f"Server doesn't have version '{version_to_delete}.'"}
         else:
-            self.db.delete_query(
+            self.db.execute_query(
                 query="""DELETE FROM server_versions WHERE version = ?;""",
                 params=(version_to_delete,))
             return {f"Version deleted": f"Server version '{version_to_delete}' successfully deleted."}
@@ -71,12 +71,11 @@ class Server:
             if privileges != "admin":
                 privileges = "user"
             password = self.password_generator()
-            # random_user_id = random.choice(range(1, 999999))
-            self.db.insert_query(query="""INSERT INTO users (username) VALUES (?);""",
+            self.db.execute_query(query="""INSERT INTO users (username) VALUES (?);""",
                                          params=(username,))
-            self.db.insert_query(query="""INSERT INTO users_passwords VALUES (?, ?);""",
+            self.db.execute_query(query="""INSERT INTO users_passwords VALUES (?, ?);""",
                                          params=(username, password))
-            self.db.insert_query(query="""INSERT INTO users_privileges VALUES (?, ?);""",
+            self.db.execute_query(query="""INSERT INTO users_privileges VALUES (?, ?);""",
                                          params=(username, privileges))
             print(password)
             success_message = {
@@ -97,8 +96,11 @@ class Server:
             }
             return error_message_cant_delete_admin
         else:
-            self.db.delete_query(
+            self.db.execute_query(
                 query="""DELETE FROM users WHERE username = ?;""",
+                params=(username_to_delete,))
+            self.db.execute_query(
+                query="""DELETE FROM users_privileges WHERE username = ?;""",
                 params=(username_to_delete,))
             success_message_user_deleted = {"User deleted": f"All '{username_to_delete}' user data has been deleted."}
             return success_message_user_deleted
@@ -142,7 +144,7 @@ class Server:
                 if (self.count_unread_messages_in_user_inbox(
                         recipient_username) < self.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
                         self.check_if_user_has_admin_privileges(recipient_username)):
-                    self.db.insert_query(
+                    self.db.execute_query(
                         query="""INSERT INTO users_messages(sender_username,
                                     recipient_username,
                                     message_content,
@@ -175,7 +177,7 @@ class Server:
                     if (self.count_unread_messages_in_user_inbox(
                             recipient_username) < self.INBOX_UNREAD_MESSAGES_LIMIT_FOR_USER) or (
                             self.check_if_user_has_admin_privileges(recipient_username)):
-                        self.db.insert_query(
+                        self.db.execute_query(
                             query="""INSERT INTO users_messages(sender_username,
                                                                 recipient_username,
                                                                 message_content,
@@ -199,7 +201,7 @@ class Server:
         return messages_stats
 
     def show_inbox(self, username):
-        self.db.update_query(
+        self.db.execute_query(
             query="""UPDATE users_messages SET read_by_recipient = 1 WHERE recipient_username = ?;""",
             params=(username,))
         messages = self.db.get_all(
@@ -231,7 +233,7 @@ class Server:
             }
             return error_message_incorrect_privileges
         else:
-            self.db.update_query(query="""UPDATE users_privileges SET privileges = ? WHERE username = ?;""",
+            self.db.execute_query(query="""UPDATE users_privileges SET privileges = ? WHERE username = ?;""",
                                          params=(new_privileges, username,))
             message_privileges_changed = \
                 {"Privileges changed": f"The user '{username}' now has an {new_privileges} privileges."}
@@ -247,7 +249,7 @@ class Server:
 
     def get_all_users_list(self):
         result = self.db.get_all(
-            query="""SELECT username FROM users_privileges;""")
+            query="""SELECT username FROM users_privileges WHERE privileges = ?;""", params=("user", ))
         users_list = [user[0] for user in result]
         print(users_list)
         return users_list
@@ -265,14 +267,14 @@ class Server:
     def generate_admin_token(self, num_of_tokens):
         for _ in range(num_of_tokens):
             admin_token = self.password_generator(length=60)
-            self.db.insert_query(query="""INSERT INTO admin_tokens VALUES (?, ?);""", params=(admin_token, 1, ))
+            self.db.execute_query(query="""INSERT INTO admin_tokens VALUES (?, ?);""", params=(admin_token, 1, ))
 
     def verify_admin_token(self, admin_token_to_check):
         result = self.db.get_all(
             query="""SELECT COUNT(*) FROM admin_tokens WHERE token_id = ? and is_valid = ?;""",
             params=(admin_token_to_check, 1,))
         if result[0][0] == 1:
-            self.db.update_query(
+            self.db.execute_query(
                 query="""UPDATE admin_tokens set is_valid = ? WHERE token_id = ?;""",
                 params=(0, admin_token_to_check,))
             return True
