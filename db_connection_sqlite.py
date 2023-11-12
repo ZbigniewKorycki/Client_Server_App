@@ -29,6 +29,7 @@ class SQLiteConnection:
             cursor.execute(query, params)
         except Error:
             connection.rollback()
+            return False
         else:
             connection.commit()
         finally:
@@ -45,6 +46,7 @@ class SQLiteConnection:
             items = cursor.fetchall()
         except Error:
             connection.rollback()
+            return False
         else:
             connection.commit()
             return items
@@ -62,6 +64,7 @@ class SQLiteConnection:
             item = cursor.fetchone()
         except Error:
             connection.rollback()
+            return False
         else:
             connection.commit()
             return item
