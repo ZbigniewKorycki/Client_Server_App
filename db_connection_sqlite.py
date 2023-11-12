@@ -19,12 +19,12 @@ class SQLiteConnection:
         else:
             self.connection = conn
 
-    def execute_query(self, query):
+    def execute_query(self, query, params=None):
         if self.connection is None:
             self.create_connection()
         connection = self.connection
         cursor = connection.cursor()
-        cursor.execute(query)
+        cursor.execute(query, params)
         connection.commit()
         connection.close()
         self.connection = None
@@ -96,16 +96,19 @@ class SQLiteConnection:
 
     def create_starting_tables(self):
         self.execute_query(
-            """CREATE TABLE IF NOT EXISTS server_versions (version text PRIMARY KEY, version_date text)""")
-        self.execute_query("""CREATE TABLE IF NOT EXISTS users (user_id integer PRIMARY KEY, username text)""")
+            """CREATE TABLE IF NOT EXISTS server_versions (version text PRIMARY KEY, version_date text)""", params=())
+        self.execute_query("""CREATE TABLE IF NOT EXISTS users (user_id integer PRIMARY KEY, username text)""",
+                           params=())
         self.execute_query(query="""CREATE TABLE IF NOT EXISTS users_privileges (
                                             username text,
                                             privileges text NOT NULL DEFAULT user,
-                                            FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE);""")
+                                            FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE);""",
+                           params=())
         self.execute_query(query="""CREATE TABLE IF NOT EXISTS users_passwords (
                                             username text,
                                             password text,
-                                            FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE);""")
+                                            FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE);""",
+                           params=())
         self.execute_query(query="""CREATE TABLE IF NOT EXISTS users_messages (
                                         message_id integer PRIMARY KEY,
                                         sender_username text NOT NULL,
@@ -114,11 +117,13 @@ class SQLiteConnection:
                                         sending_date text NOT NULL,
                                         read_by_recipient integer DEFAULT 0 NOT NULL,
                                         FOREIGN KEY (sender_username) REFERENCES users(username) ON DELETE CASCADE,
-                                        FOREIGN KEY (recipient_username) REFERENCES users(username) ON DELETE CASCADE);""")
+                                        FOREIGN KEY (recipient_username) REFERENCES users(username) ON DELETE CASCADE);""",
+                           params=())
 
         self.execute_query(query="""CREATE TABLE IF NOT EXISTS admin_tokens (
                                                                                 token_id text,
-                                                                                is_valid text NOT NULL DEFAULT 1);""")
+                                                                                is_valid text NOT NULL DEFAULT 1);""",
+                           params=())
 
 
 if __name__ == '__main__':
