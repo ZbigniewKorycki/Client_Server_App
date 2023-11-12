@@ -1,7 +1,7 @@
 from datetime import datetime
 import random
 import string
-from db_connection import PostgresSQLConnection
+from db_connection_postgres import PostgresSQLConnection
 
 
 class Server:

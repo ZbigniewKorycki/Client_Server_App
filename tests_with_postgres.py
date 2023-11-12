@@ -1,8 +1,8 @@
 import unittest
-from server_logic import Server
+from server_logic_with_postgres import Server
 import datetime
 import commands
-from db_connection import PostgresSQLConnection
+from db_connection_postgres import PostgresSQLConnection
 import psycopg2
 
 
@@ -227,6 +227,7 @@ class TestCommandsDescription(unittest.TestCase):
         self.assertIn("delete-user", result)
         self.assertIn("change-privileges", result)
 
+
 class TestDatabaseConnection(unittest.TestCase):
 
     def setUp(self):
@@ -251,10 +252,11 @@ class TestDatabaseConnection(unittest.TestCase):
     def test_database_transaction(self):
         result_incorrect_syntax = self.db.database_transaction("""INCORRECT QUERY test_table VALUES ("value");""")
         result_table_dont_exists = self.db.database_transaction(
-                    query="""INSERT INTO test_table VALUES (%s, %s);""",
-                    params=("1.9", 199))
+            query="""INSERT INTO test_table VALUES (%s, %s);""",
+            params=("1.9", 199))
         self.assertFalse(result_incorrect_syntax)
         self.assertFalse(result_table_dont_exists)
+
 
 if __name__ == '__main__':
     unittest.main()
