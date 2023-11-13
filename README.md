@@ -1,3 +1,3 @@
 <h1>User Management Tool</h1>
 
-User Management Tool is an application designed for seamless communication via a server-client architecture. The application supports both SQLite and PostgreSQL for efficient data storage, with a primary focus on user management and messaging. The client interacts seamlessly with the server via socket communication, making it easy to send commands and receive responses in JSON format. The application is covered with unit tests to assess functionality. These tests were implemented using the unittest framework.
+An application for smooth communication using a server-client setup. It works with both SQLite and PostgreSQL, emphasizing user management and messaging. The client communicates with the server through sockets, exchanging commands and responses in JSON. The application is covered with unit tests
